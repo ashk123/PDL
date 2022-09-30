@@ -3,4 +3,4 @@ Beta Version 2022 - PDL 1.2
 LainOS Team
 
 - Add Program Remove Panel
-- Fix some dangeres bug
+- Fix some dangerous bug
