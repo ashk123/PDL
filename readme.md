@@ -32,5 +32,11 @@ Document of PDL ( packag downloading lainOS )
 	3. push it into your own github and send your git-rep link to us
 	3-2. or send .zip file as a email to us
 
+- Dev Information
+
+	Database: sqlite3 V3.34.1
+	Programming Language: Bash V5.1.4
+	OS: LainOS (debian)
+	
 
 - Have good time with PDL !
