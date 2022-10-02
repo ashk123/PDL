@@ -159,13 +159,6 @@ function norm_inst()
 	}
 
 }
-function customize_installation()
-{
-	local t=$1
-	echo "[+] $t item is added to your program list ."
-	cust+=($t)
-}
-
 
 
 function custom()
