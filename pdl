@@ -129,6 +129,7 @@ function help()
 	echo "-c         	  install compile level programs"
 	echo "-i         	  install custome programs"
 	echo "-u/--update       Update patch files from git repository"
+	echo "-r		  Remove Item from custom list"
 } 
 
 function comp_inst()
