@@ -212,14 +212,6 @@ function net()
 	
 }
 
-
-function choos_item_cust()
-{
-	cust_names=($(sqlite3 mainsb "select name from cus_prg"))
-	mapfile -t arr3 <<< "$cust_names"
-	echo "$1"
-}
-
 function custom_menu()
 {
 	echo "you have these option : ";
