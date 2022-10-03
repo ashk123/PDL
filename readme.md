@@ -29,7 +29,7 @@ Document of PDL ( packag downloading lainOS )
 	If you want to made your custome PDL, you should do these works :
 	1. clone PDL source code from LainOS github
 	2. add or modify your custome featurs
-	3. push it into your own github and send your git-rep link to us
+	3. push it into your own github and send your git-rep link to us <br>
 	3-2. or send .zip file as a email to us
 
 - Dev Information
