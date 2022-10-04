@@ -68,6 +68,18 @@ function select_opt {
     return $result
 }
 
+function fileType()
+{
+	name=$1
+	len=${#name}
+	type=${name:$((len - 3))}
+	if [[ $type == "pdl" ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
 function patch_adder()
 {
 	if [ -f "$(pwd)/$1" ]; then
@@ -88,11 +100,13 @@ function patch_adder()
 	for ((i = 2; i < ${#data}; i++))
 	{
 		if [[ ${data[$i]} != "" ]]; then
-			org+="${data[$i]};"
+			if fileType ${data[$i]}; then
+				org+="${data[$i]};"
+			fi
 		fi
 	}
 	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', 'This is new Program for new mode in PDL', '$org');"
-	echo "[!] Your patch in add ."
+	# echo "[!] Your patch in add ."
 	org=""
 }
 
