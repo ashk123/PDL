@@ -6,3 +6,4 @@ LainOS Team
 - Fix some dangerous bug [ ]
 - Check files type [ ]
 - Connect PDL with LainOS website * [ ]
+- Add & parse Description from PDL file and save it in the DB
