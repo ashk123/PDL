@@ -128,6 +128,7 @@ function help()
 	echo "Description :"
 	echo "	This tool, help you to download and install packages that you can see in APT-REP or GIT-REP"
 	echo "  	We use Save installer commands into a database and you can install all packages with one click"
+	echo "	Make sure you enter apt update !, its very important for download from apt repository."
 	echo "	You should have GIT for download from github"
 	if pe "git"; then
 		echo "	Git is avalaible : yes"
