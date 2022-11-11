@@ -68,18 +68,6 @@ function select_opt {
     return $result
 }
 
-function fileType()
-{
-	name=$1
-	len=${#name}
-	type=${name:$((len - 3))}
-	if [[ $type == "pdl" ]]; then
-		return 0
-	else
-		return 1
-	fi
-}
-
 function patch_adder()
 {
 	if [ -f "$(pwd)/$1" ]; then
@@ -100,13 +88,11 @@ function patch_adder()
 	for ((i = 2; i < ${#data}; i++))
 	{
 		if [[ ${data[$i]} != "" ]]; then
-			if fileType ${data[$i]}; then
-				org+="${data[$i]};"
-			fi
+			org+="${data[$i]};"
 		fi
 	}
 	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', 'This is new Program for new mode in PDL', '$org');"
-	# echo "[!] Your patch in add ."
+	echo "[!] Your patch in add ."
 	org=""
 }
 
@@ -128,7 +114,6 @@ function help()
 	echo "Description :"
 	echo "	This tool, help you to download and install packages that you can see in APT-REP or GIT-REP"
 	echo "  	We use Save installer commands into a database and you can install all packages with one click"
-	echo "	Make sure you enter apt update !, its very important for download from apt repository."
 	echo "	You should have GIT for download from github"
 	if pe "git"; then
 		echo "	Git is avalaible : yes"
@@ -144,7 +129,6 @@ function help()
 	echo "-c         	  install compile level programs"
 	echo "-i         	  install custome programs"
 	echo "-u/--update       Update patch files from git repository"
-	echo "-r		  Remove Item from custom list"
 } 
 
 function comp_inst()
@@ -175,6 +159,13 @@ function norm_inst()
 	}
 
 }
+function customize_installation()
+{
+	local t=$1
+	echo "[+] $t item is added to your program list ."
+	cust+=($t)
+}
+
 
 
 function custom()
@@ -226,6 +217,14 @@ function net()
 	done
 	rm -rf PDLP
 	
+}
+
+
+function choos_item_cust()
+{
+	cust_names=($(sqlite3 mainsb "select name from cus_prg"))
+	mapfile -t arr3 <<< "$cust_names"
+	echo "$1"
 }
 
 function custom_menu()
