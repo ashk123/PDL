@@ -3,7 +3,7 @@ Document of PDL ( packag downloading lainOS )
 - Description
 
 	PDL is a small tool for downloading and installing packages, its not a package system, its sub-package system
-	( you can reade more about it in sub-package system side)
+	( you can read more about it in sub-package system side)
 	PDL can handle network, wtih git repository this feature that allows you
 	to download any packages from internet with .pdl file, and patch it into the PDL database
 	like other package system you can update your pdl files with PDL git repository.
