@@ -5,7 +5,7 @@
 # Writer : Wired
 # ---- For LainOS Teame ----
 
-VERSION="0.1"
+VERSION="1.2.0"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
 IFS=';'
