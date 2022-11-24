@@ -80,12 +80,13 @@ function patch_adder()
 			return 0;
 		fi
 	fi	
-	file_name=$(cat $path | grep "name" | tr " " " ")
+	# file_name=$(cat $path | grep "name" | tr " " " ")
+	file_name=$(sed -n 1p $path)
 	file_name_org=${file_name:7}
 	
 	code=$(cat $path | sed '/^[[:space:]]*$/d')
 	mapfile -t data <<< "$code"
-	for ((i = 2; i < ${#data}; i++))
+	for ((i = 2; i < ${#data[@]}; i++))
 	{
 		if [[ ${data[$i]} != "" ]]; then
 			org+="${data[$i]};"
@@ -327,7 +328,7 @@ if [ -z "$*" ] || [ $1 == "-s" ]; then
 			do
 				echo "[+] Package ${arr[$i2]}"
 			done
-		elif [[ $selc == "exit" ]]; then
+		elif [[ $selc == "exit" ]] || [[ $selc == "q" ]]; then
 			break
 		elif [ $selc == "list" ]; then
 			norm_count=($(sqlite3 mainsb "select name from norm_prg"))
