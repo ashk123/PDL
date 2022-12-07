@@ -16,7 +16,7 @@ Document of PDL ( packag downloading lainOS )
 	in client, when you want to update your pfl files, you can choose your repository
 	for uploading, we must see all your installation commands, after that we save it into repository
 
-- Why PDL
+- Why PDL ?
 
 	PDL just created for reason to have a visual package downloader in LainOS
 	we don't wanted to create a main packaging system like apt or any things like that
@@ -25,7 +25,7 @@ Document of PDL ( packag downloading lainOS )
 
 - Can I work on it as FAN ?
 
-	absolutely yes!, we want other users made better features for PDL
+	Absolutely yes!, we want other users made better features for PDL
 	If you want to made your custom PDL, you should do these works :
 	1. clone PDL source code from LainOS github
 	2. add or modify your custom features

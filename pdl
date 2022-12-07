@@ -1,14 +1,55 @@
 #!/usr/bin/bash
 
 # LainOS Orginal Program 227865 2022
-# This Project Writed for help you to Install Other Porgrams
+# This Project Writed for help you to Install Other Programs
 # Writer : Wired
-# ---- For LainOS Teame ----
+# ---- For LainOS Team ----
 
 VERSION="1.2.0"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
 IFS=';'
+
+function echo_title() {     echo -ne "\033[1;44;37m${*}\033[0m\n"; }
+function echo_caption() {   echo -ne "\033[0;1;44m${*}\033[0m\n"; }
+function echo_bold() {      echo -ne "\033[0;1;34m${*}\033[0m\n"; }
+function echo_danger() {    echo -ne "\033[0;31m${*}\033[0m\n"; }
+function echo_success() {   echo -ne "\033[0;32m${*}\033[0m\n"; }
+function echo_warning() {   echo -ne "\033[0;33m${*}\033[0m\n"; }
+function echo_secondary() { echo -ne "\033[0;34m${*}\033[0m"; }
+function echo_info() {      echo -ne "\033[0;35m${*}\033[0m\n"; }
+function echo_primary() {   echo -ne "\033[0;36m${*}\033[0m\n"; }
+function echo_error() {     echo -ne "\033[0;1;31merror:\033[0;31m\t${*}\033[0m\n"; }
+function echo_label() {     echo -ne "\033[0;1;32m${*}:\033[0m\t"; }
+function echo_prompt() {    echo -ne "\033[0;36m${*}\033[0m "; }
+
+function splash() {
+    local hr
+    hr=" **$(printf "%${#1}s" | tr ' ' '*')** "
+    echo_title "${hr}"
+    echo_title " * $1 * "
+    echo_title "${hr}"
+    echo
+}
+
+function echo_test(){
+	echo_title title
+	echo_caption caption
+	echo_bold bold
+	echo_danger danger
+	echo_success success
+	echo_warning warning
+	echo_primary primary
+	echo_secondary secondary
+	echo_info info
+	echo_label label
+	echo_error error
+	echo_prompt prompt
+	splash splash
+}
+
+#echo_test
+
 
 function select_option {
 
@@ -101,7 +142,7 @@ cust=()
 $selc;
 $pck_name;
 $str;
-echo "LainOS PRGD - V0.1"
+splash "LainOS PRGD - V0.1"
 
 function pe() {
     dpkg -s "$1" &> /dev/null
@@ -110,26 +151,26 @@ function pe() {
 
 function help()
 {
-	echo "-- LainOS Package Downloader LainOS (PDL) Version 1.2 --"
+	echo_caption "-- LainOS Package Downloader LainOS (PDL) Version 1.2 --"
 	echo
-	echo "Description :"
-	echo "	This tool, helps you to download and install packages that you can see in APT-REP or GIT-REP"
-	echo "  	We use Save installer commands into a database and you can install all packages with one click"
-	echo "	You should have GIT for download from github"
+	echo_primary "Description :"
+	echo_secondary "	This tool, helps you to download and install packages that you can see in APT-REP or GIT-REP\n"
+	echo_secondary "  	We use Save installer commands into a database and you can install all packages with one click\n"
+	echo_secondary "	You should have GIT for download from github\n"
 	if pe "git"; then
-		echo "	Git is available : yes"
+		echo_secondary "	Git is available : "; echo_success "yes"
 	else
-		echo "	Git is available : no"
+		echo_secondary "	Git is available : "; echo_danger "no"
 	fi
 	echo
 	echo "-------------"
-	echo "	Arguments :"
-	echo "-h/--help  Help command"
-	echo "-p         	  add patch file to PDL"
-	echo "-n         	  install normall level programs"
-	echo "-c         	  install compile level programs"
-	echo "-i         	  install custome programs"
-	echo "-u/--update       Update patch files from git repository"
+	echo_primary "Arguments :"
+	echo_secondary "-h/--help         ";echo_info "help command"
+	echo_secondary "-p         	  ";echo_info "add patch file to PDL"
+	echo_secondary "-n         	  ";echo_info "install normall level programs"
+	echo_secondary "-c         	  ";echo_info "install compile level programs"
+	echo_secondary "-i         	  ";echo_info "install custome programs"
+	echo_secondary "-u/--update       ";echo_info "update patch files from git repository"
 } 
 
 function comp_inst()
@@ -281,10 +322,10 @@ function cus_remove()
 
 if [ -z "$*" ] || [ $1 == "-s" ]; then
 	echo ""
-	echo "1. Normal installation (${#ncc[@]})"
-	echo "2. Compilers           (${#ccc[@]})"
-	echo "3. Customize           (${#cucc[@]})"
-	echo "LainOS Package Downloader V-0.2"
+	echo_primary "1. Normal installation (${#ncc[@]})"
+	echo_primary "2. Compilers           (${#ccc[@]})"
+	echo_primary "3. Customize           (${#cucc[@]})"
+	echo_primary "LainOS Package Downloader V-0.2"
 
 	while [ true ]
 	do
@@ -336,9 +377,9 @@ if [ -z "$*" ] || [ $1 == "-s" ]; then
 			cus_count=($(sqlite3 mainsb "select name from cus_prg"))
 			GetCount
 			echo ""
-			echo "1. Normal installation (${#ncc[@]})"
-			echo "2. Compilers           (${#ccc[@]})"
-			echo "3. Customize           (${#cucc[@]})"
+			echo_primary "1. Normal installation (${#ncc[@]})"
+			echo_primary "2. Compilers           (${#ccc[@]})"
+			echo_primary "3. Customize           (${#cucc[@]})"
 		elif [ $selc == "version" ]; then
 			echo $VERSION
 		elif [ $selc == "os" ]; then
