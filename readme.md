@@ -1,4 +1,4 @@
-Document of PDL ( packag downloading lainOS )
+Document of PDL ( package downloading lainOS )
 
 - Description
 
