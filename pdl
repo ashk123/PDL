@@ -170,6 +170,7 @@ function help()
 	echo_secondary "-n         	  ";echo_info "install normall level programs"
 	echo_secondary "-c         	  ";echo_info "install compile level programs"
 	echo_secondary "-i         	  ";echo_info "install custome programs"
+	echo_secondary "-l		  ";echo_info "List all programs and PDL patch files that currently PDL have it"
 	echo_secondary "-u/--update       ";echo_info "update patch files from git repository"
 } 
 
@@ -249,7 +250,7 @@ function net()
 		return 0;
 	fi
 
-	git clone "https://github.com/ashk123/PDLP.git" -q
+	git clone "https://github.com/ashk123/PDLP.git"
 	file=$(ls PDLP)
 	mapfile -t files <<< "$file"
 	for ((a = 0; a < ${#files[@]}; a++))
