@@ -249,7 +249,7 @@ function net()
 		return 0;
 	fi
 
-	git clone "https://github.com/ashk123/PDLP.git"
+	git clone "https://github.com/ashk123/PDLP.git" -q
 	file=$(ls PDLP)
 	mapfile -t files <<< "$file"
 	for ((a = 0; a < ${#files[@]}; a++))
