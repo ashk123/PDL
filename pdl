@@ -142,7 +142,7 @@ cust=()
 $selc;
 $pck_name;
 $str;
-splash "LainOS PRGD - V0.1"
+splash "LainOS PRGD - V$VERSION"
 
 function pe() {
     dpkg -s "$1" &> /dev/null
@@ -151,7 +151,7 @@ function pe() {
 
 function help()
 {
-	echo_caption "-- LainOS Package Downloader LainOS (PDL) Version 1.2 --"
+	echo_caption "-- LainOS Package Downloader LainOS (PDL) Version $VERSION --"
 	echo
 	echo_primary "Description :"
 	echo_secondary "	This tool, helps you to download and install packages that you can see in APT-REP or GIT-REP\n"
