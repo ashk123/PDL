@@ -331,7 +331,10 @@ if [ -z "$*" ] || [ $1 == "-s" ]; then
 	while [ true ]
 	do
 		read -p ": " selc
-
+		if [[ $selc == "" ]]; then
+			echo_primary "Enter a correct one !";
+			continue
+		fi
 		if [[ $selc == "1" ]]; then
 			norm_inst;
 		elif [[ $selc == "2" ]]; then
