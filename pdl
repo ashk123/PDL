@@ -9,6 +9,7 @@ VERSION="1.2.0"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
 IFS=';'
+DB_PATH='/usr/local/mainsb'
 
 function echo_title() {     echo -ne "\033[1;44;37m${*}\033[0m\n"; }
 function echo_caption() {   echo -ne "\033[0;1;44m${*}\033[0m\n"; }
@@ -114,8 +115,8 @@ function patch_adder()
 	if [ -f "$(pwd)/$1" ]; then
 		path=$1
 	else
-		if [ -f "$(pwd)/PDLP/$1" ]; then
-			path="PDLP/$1"
+		if [ -f "/usr/local/bin/PDLP/$1" ]; then
+			path="/usr/local/bin/PDLP/$1"
 		else
 			echo "your file is not found !"
 			return 0;
@@ -133,7 +134,7 @@ function patch_adder()
 			org+="${data[$i]};"
 		fi
 	}
-	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', 'This is new Program for new mode in PDL', '$org');"
+	sqlite3 $DB_PATH "insert into cus_prg values ('$file_name_org', 'This is new Program for new mode in PDL', '$org');"
 	echo "[!] Your patch in add ."
 	org=""
 }
@@ -176,7 +177,7 @@ function help()
 
 function comp_inst()
 {
-	data=($(sqlite3 mainsb 'select name from comp_prg'))
+	data=($(sqlite3 $DB_PATH 'select name from comp_prg'))
 	mapfile -t arr7 <<< "$data"
 	for ((i = 0; i < ${#arr7[@]}; i++))
 	{
@@ -190,7 +191,7 @@ function comp_inst()
 
 function norm_inst()
 {
-	data2=($(sqlite3 mainsb 'select name from norm_prg'))
+	data2=($(sqlite3 $DB_PATH 'select name from norm_prg'))
 	mapfile -t arr5 <<< "$data2"
 	for ((i = 0; i < ${#arr5[@]}; i++))
 	{
@@ -213,12 +214,12 @@ function customize_installation()
 
 function custom()
 {
-	data_name=($(sqlite3 mainsb "select name from cus_prg"))
+	data_name=($(sqlite3 $DB_PATH "select name from cus_prg"))
 	mapfile -t dnc <<< "$data_name"
 	for ((o = 0; o < ${#dnc[@]}; o++))
 	do
 		if [[ ${dnc[$o]} == $1 ]]; then
-			data_code=$(sqlite3 mainsb "select code from cus_prg where name='$1'")
+			data_code=$(sqlite3 $DB_PATH "select code from cus_prg where name='$1'")
 			read -a str <<< "$data_code"
 			break
 		fi
@@ -231,9 +232,9 @@ function custom()
 }
 
 function GetCount(){
-	norm_count=($(sqlite3 mainsb "select name from norm_prg"))
-	comp_count=($(sqlite3 mainsb "select name from comp_prg"))
-	cus_count=($(sqlite3 mainsb "select name from cus_prg"))
+	norm_count=($(sqlite3 $DB_PATH "select name from norm_prg"))
+	comp_count=($(sqlite3 $DB_PATH "select name from comp_prg"))
+	cus_count=($(sqlite3 $DB_PATH "select name from cus_prg"))
 	mapfile -t ncc <<< "$norm_count"		
 	mapfile -t ccc <<< "$comp_count"
 	mapfile -t cucc <<< "$cus_count"
@@ -250,22 +251,22 @@ function net()
 		return 0;
 	fi
 
-	git clone "https://github.com/ashk123/PDLP.git" -q
-	file=$(ls PDLP)
+	git clone "https://github.com/ashk123/PDLP.git" /usr/local/bin/PDLP -q
+	file=$(ls /usr/local/bin/PDLP)
 	mapfile -t files <<< "$file"
 	for ((a = 0; a < ${#files[@]}; a++))
 	do
 		patch_adder ${files[$a]}
 		echo "[+] Patch ${files[$a]} Install"
 	done
-	rm -rf PDLP
+	rm -rf /usr/local/bin/PDLP
 	
 }
 
 
 function choos_item_cust()
 {
-	cust_names=($(sqlite3 mainsb "select name from cus_prg"))
+	cust_names=($(sqlite3 $DB_PATH "select name from cus_prg"))
 	mapfile -t arr3 <<< "$cust_names"
 	echo "$1"
 }
@@ -275,7 +276,7 @@ function custom_menu()
 	echo "you have these option : ";
 	echo ""
 	custs=()
-	cust_names=($(sqlite3 mainsb "select name from cus_prg"))
+	cust_names=($(sqlite3 $DB_PATH "select name from cus_prg"))
 	mapfile -t arr3 <<< "$cust_names"
 	for ((i3 = 0; i3 < ${#arr3[@]}; i3++))
 	do
@@ -290,20 +291,20 @@ function custom_menu()
 
 function prg_list()
 {
-	data_name=($(sqlite3 mainsb "select name from cus_prg"))
+	data_name=($(sqlite3 $DB_PATH "select name from cus_prg"))
 	mapfile -t prg_names <<< "$data_name"
 	for ((a = 0; a < ${#prg_names[@]}; a++))
 	{
 		echo "$((a + 1)) - ${prg_names[$a]}"
 	}
-	data_name=($(sqlite3 mainsb "select name from norm_prg"))
+	data_name=($(sqlite3 $DB_PATH "select name from norm_prg"))
 	mapfile -t norm_names <<< "$data_name"
 	for ((b = 0; b < ${#norm_names[@]}; b++))
 	{
 		echo "$((a + 1)) - ${norm_names[$b]}"
 		a=$a+1
 	}
-	data_name=($(sqlite3 mainsb "select name from comp_prg"))
+	data_name=($(sqlite3 $DB_PATH "select name from comp_prg"))
 	mapfile -t comp_names <<< "$data_name"
 	for ((c = 0; c < ${#comp_names[@]}; c++))
 	{
@@ -317,7 +318,7 @@ function prg_list()
 function cus_remove()
 {
 	# Sql-Injection Zone - we should check value or better way use regex
-	sqlite3 mainsb "delete from cus_prg where name = '$1'"
+	sqlite3 $DB_PATH "delete from cus_prg where name = '$1'"
 	echo "[+] Package $1 is remove from custome packages"
 }
 
@@ -343,7 +344,7 @@ if [ -z "$*" ] || [ $1 == "-s" ]; then
 			echo "you have these option : ";
 			echo ""
 			custs=()
-			cust_names=($(sqlite3 mainsb "select name from cus_prg"))
+			cust_names=($(sqlite3 $DB_PATH "select name from cus_prg"))
 			mapfile -t arr3 <<< "$cust_names"
 			for ((i3 = 0; i3 < ${#arr3[@]}; i3++))
 			do
@@ -359,7 +360,7 @@ if [ -z "$*" ] || [ $1 == "-s" ]; then
 		elif [[ $selc == "list 1" ]]; then
 			echo "-- Normal installation Packages --"
 			echo ""
-			data=($(sqlite3 mainsb 'select name from norm_prg'))
+			data=($(sqlite3 $DB_PATH 'select name from norm_prg'))
 			mapfile -t arr2 <<< "$data"
 			for ((i4 = 0; i4 < ${#arr2[@]}; i4++))
 			do
@@ -367,7 +368,7 @@ if [ -z "$*" ] || [ $1 == "-s" ]; then
 			done
 		elif [[ $selc == "list 2" ]]; then
 			echo "-- Compilers installation Packages --"
-			data2=($(sqlite3 mainsb 'select name from comp_prg'))
+			data2=($(sqlite3 $DB_PATH 'select name from comp_prg'))
 			mapfile -t arr <<< "$data2"
 			for ((i2 = 0; i2 < ${#arr[@]}; i2++))
 			do
@@ -376,9 +377,9 @@ if [ -z "$*" ] || [ $1 == "-s" ]; then
 		elif [[ $selc == "exit" ]] || [[ $selc == "q" ]]; then
 			break
 		elif [ $selc == "list" ]; then
-			norm_count=($(sqlite3 mainsb "select name from norm_prg"))
-			comp_count=($(sqlite3 mainsb "select name from comp_prg"))
-			cus_count=($(sqlite3 mainsb "select name from cus_prg"))
+			norm_count=($(sqlite3 $DB_PATH "select name from norm_prg"))
+			comp_count=($(sqlite3 $DB_PATH "select name from comp_prg"))
+			cus_count=($(sqlite3 $DB_PATH "select name from cus_prg"))
 			GetCount
 			echo ""
 			echo_primary "1. Normal installation (${#ncc[@]})"

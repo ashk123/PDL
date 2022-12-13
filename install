@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+
+# PDL (Package Downloading LainOS ) Installer
+# ashk123/Eiko and LainOS team 2022
+
+echo "welcome to PDL installer !"
+echo "PDL will install soon !"
+sudo cp mainsb /usr/local
+sudo cp pdl /usr/local/bin
+echo "I install PDL for you !!!"
+echo "you can use it with 'pdl' command !"
+
