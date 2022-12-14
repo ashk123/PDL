@@ -22,7 +22,6 @@ function echo_primary() {   echo -ne "\033[0;36m${*}\033[0m\n"; }
 function echo_error() {     echo -ne "\033[0;1;31merror:\033[0;31m\t${*}\033[0m\n"; }
 function echo_label() {     echo -ne "\033[0;1;32m${*}:\033[0m\t"; }
 function echo_prompt() {    echo -ne "\033[0;36m${*}\033[0m "; }
-
 function splash() {
     local hr
     hr=" **$(printf "%${#1}s" | tr ' ' '*')** "
@@ -132,7 +131,7 @@ function patch_adder()
 		fi
 	}
 	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', 'This is new Program for new mode in PDL', '$org');"
-	echo "[!] Your patch in add ."
+	echo_success "[+] The $1 patch file was applied"
 	org=""
 }
 
@@ -155,11 +154,11 @@ function help()
 	echo_secondary "	This tool helps you to download and install packages that you can see in APT-REP or GIT-REP\n"
 	echo_secondary "  	We use Save installer commands into a database and you can install all packages with one click\n"
 	echo_secondary "	You should have GIT for download from github\n"
-	echo_secondary "	Git is available : "
+	echo_secondary "	Is git available? "
 	if pe "git"; then
-		echo_success "yes"
+		echo_success "Yes!"
 	else
-		echo_danger "no"
+		echo_danger "No!"
 	fi
 	echo
 	echo "-------------"
@@ -199,7 +198,6 @@ function norm_inst()
 			eval "sudo apt install ${arr5[$i]}"
 		fi
 	}
-
 }
 
 function customize_installation()
@@ -243,7 +241,7 @@ function net()
 	if pe "git"; then
 		echo
 	else
-		echo "you don't have git, first you should install git ..."
+		echo_error "you don't have git, first you should install git ..."
 		return 0;
 	fi
 
@@ -253,10 +251,9 @@ function net()
 	for ((a = 0; a < ${#files[@]}; a++))
 	do
 		patch_adder ${files[$a]}
-		echo "[+] Patch ${files[$a]} Install"
+		#echo "[+] Patch ${files[$a]} Install"
 	done
 	rm -rf PDLP
-	
 }
 
 function choos_item_cust()
