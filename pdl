@@ -122,6 +122,17 @@ function patch_adder()
 	file_name=$(sed -n 1p $path)
 	file_name_org=${file_name:7}
 	
+	pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg")
+	mapfile pars_names <<< "$pfiles"
+	for ((a = 0; a < ${#pars_names[@]}; a++))
+	{
+		org=${pars_names[$a]};
+		if [[ $file_name_org == ${org:0:-1} ]]; then
+			echo_danger "you have already had $file_name_org this file !"
+			return 1;
+		fi
+	}
+
 	code=$(cat $path | sed '/^[[:space:]]*$/d')
 	mapfile -t data <<< "$code"
 	for ((i = 2; i < ${#data[@]}; i++))
@@ -250,8 +261,14 @@ function net()
 	mapfile -t files <<< "$file"
 	for ((a = 0; a < ${#files[@]}; a++))
 	do
-		patch_adder ${files[$a]}
-		#echo "[+] Patch ${files[$a]} Install"
+		stext=${files[$a]}
+		slen=${#files[$a]}
+		if [[ ${stext:$((slen - 3)):3} != "pdl" ]]; then
+			echo_danger "you can't any file type !";
+		else
+			patch_adder ${files[$a]}
+			#echo "[+] Patch ${files[$a]} Install"
+		fi
 	done
 	rm -rf PDLP
 }
