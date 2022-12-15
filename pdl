@@ -113,8 +113,6 @@ function patch_adder()
 	if [[ ${stext:$((slen - 3)):3} != "pdl" ]]; then
 		echo_danger "you can't use any file type !";
 		return 0
-	else
-		echo "this file is good !"
 	fi
 
 	if [ -f "$(pwd)/$1" ]; then
