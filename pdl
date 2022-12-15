@@ -108,6 +108,15 @@ function select_opt {
 
 function patch_adder()
 {
+	stext=$1
+	slen=${#stext}
+	if [[ ${stext:$((slen - 3)):3} != "pdl" ]]; then
+		echo_danger "you can't use any file type !";
+		return 0
+	else
+		echo "this file is good !"
+	fi
+
 	if [ -f "$(pwd)/$1" ]; then
 		path=$1
 	else
@@ -261,14 +270,8 @@ function net()
 	mapfile -t files <<< "$file"
 	for ((a = 0; a < ${#files[@]}; a++))
 	do
-		stext=${files[$a]}
-		slen=${#files[$a]}
-		if [[ ${stext:$((slen - 3)):3} != "pdl" ]]; then
-			echo_danger "you can't any file type !";
-		else
-			patch_adder ${files[$a]}
-			#echo "[+] Patch ${files[$a]} Install"
-		fi
+		patch_adder ${files[$a]}
+		#echo "[+] Patch ${files[$a]} Install"
 	done
 	rm -rf PDLP
 }
