@@ -125,7 +125,6 @@ function patch_adder()
 			return 0;
 		fi
 	fi	
-	# file_name=$(cat $path | grep "name" | tr " " " ")
 	file_name=$(sed -n 1p $path)
 	file_name_org=${file_name:7}
 	
@@ -157,6 +156,8 @@ cust=()
 $selc;
 $pck_name;
 $str;
+
+# PDL Banner
 splash "LainOS PRGD - V$VERSION"
 
 function pe() {
