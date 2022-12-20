@@ -8,4 +8,4 @@ LainOS Team
 - Connect PDL with LainOS website * [ ]
 - Add & parse Description from PDL patch file and save it in the DB [ ]
 - make more than 1 repo for users ( users can set more than 1 repo ) []
-- Download pathc files from repo based on branch []
+- Download path files from repo based on branch []

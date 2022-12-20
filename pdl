@@ -5,7 +5,7 @@
 # Writer : Wired
 # ---- For LainOS Team ----
 
-VERSION="1.2.0"
+VERSION="2.9"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
 IFS=';'
@@ -30,23 +30,6 @@ function splash() {
     echo_title "${hr}"
     echo
 }
-
-function echo_test(){
-	echo_title title
-	echo_caption caption
-	echo_bold bold
-	echo_danger danger
-	echo_success success
-	echo_warning warning
-	echo_primary primary
-	echo_secondary secondary
-	echo_info info
-	echo_label label
-	echo_error error
-	echo_prompt prompt
-	splash splash
-}
-#echo_test
 
 function select_option {
 
@@ -175,7 +158,7 @@ function help()
 	echo_secondary "	You should have GIT for download from github\n"
 	echo_secondary "	Is git available? "
 	if pe "git"; then
-		echo_success "Yes!"
+		echo_success "Yes"
 	else
 		echo_danger "No!"
 	fi
@@ -411,10 +394,12 @@ elif [ $1 == "-c" ]; then
 	comp_inst
 elif [ $1 == "-i" ]; then
 	custom $2
+elif [ $1 == "-v" ]; then
+	echo $VERSION;
 elif [ $1 == "-l" ]; then
 	prg_list
 elif [ $1 == "-r" ]; then
 	cus_remove $2
 else
-	echo "This command is not found !, try ./main --help"
+	echo_danger "This command is not found !, try ./main --help"
 fi
