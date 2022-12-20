@@ -5,10 +5,30 @@
 # Writer : Wired
 # ---- For LainOS Team ----
 
+# Information ( Don't change thease texts )
+# default repo is https://github.com/ashk123/PDLP
+# default OS is LainOS
+# default version is 2.9
+# default SHOW is all
+# default MENU is 1
+# default CONF_PATH is ~/.pdlrc
+# pdlrc.sample is a sample config file
+
+# Config Structure
+# your config file should be on ~/.pdlrc ( you can change it on CONF_PATH var )
+# repo: its a repo git address like https://yourgitservice/yourusername/yourpdlpreponame
+# show: how menu start when you run pdl
+# list: when you use -l, which group of programs that pdl should show you
+
 VERSION="2.9"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
+CONF_PATH='/home/$(whoami)'
+MENU='1'
+SHOW='all'
+REPO='https://github.com/ashk123/PDLP'
 IFS=';'
+
 
 function echo_title() {     echo -ne "\033[1;44;37m${*}\033[0m\n"; }
 function echo_caption() {   echo -ne "\033[0;1;44m${*}\033[0m\n"; }
@@ -135,6 +155,37 @@ function patch_adder()
 	org=""
 }
 
+
+function ConfigCore(){
+	shopt -s extglob
+	configfile="$CONF_PATH/.pdlrc" 	
+	tr -d '\r' < $configfile > $configfile.unix
+	while IFS='= ' read -r lhs rhs
+	do
+	    if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
+		rhs="${rhs%%\#*}"
+		rhs="${rhs%%*( )}"
+		rhs="${rhs%\"*}"
+		rhs="${rhs#\"*}" 
+		declare $lhs="$rhs"
+	    fi
+	done < $configfile.unix
+	rm -rf $CONF_PATH/.pdlrc.unix
+	
+	if (( ${#repo} > 2 )); then
+		REPO=$repo;
+	fi
+
+	if (( ${#menu} > 0 )); then
+		MENU=$menu;
+	fi
+	
+	if (( ${#list} > 1 )); then
+		SHOW=$list;
+	fi
+}
+
+
 cust=()
 $selc;
 $pck_name;
@@ -142,6 +193,7 @@ $str;
 
 # PDL Banner
 splash "LainOS PRGD - V$VERSION"
+ConfigCore
 
 function pe() {
     dpkg -s "$1" &> /dev/null
@@ -172,7 +224,9 @@ function help()
 	echo_secondary "-i         	  "; echo_info "install custom programs"
 	echo_secondary "-l		  "; echo_info "list all programs and PDL patch files that currently PDL have"
 	echo_secondary "-u/--update       "; echo_info "update patch files from PDLP git repository"
-} 
+	echo_secondary "-d       	  "; echo_info "Remove Program with name"
+	echo_secondary "-r       	  "; echo_info "Print repository that pdl currently use"
+}
 
 function comp_inst()
 {
@@ -247,13 +301,12 @@ function net()
 		return 0;
 	fi
 
-	git clone "https://github.com/ashk123/PDLP.git" -q
+	git clone "$REPO" -q
 	file=$(ls PDLP)
 	mapfile -t files <<< "$file"
 	for ((a = 0; a < ${#files[@]}; a++))
 	do
 		patch_adder ${files[$a]}
-		#echo "[+] Patch ${files[$a]} Install"
 	done
 	rm -rf PDLP
 }
@@ -298,21 +351,23 @@ function prg_list()
 	{
 		echo "$((a + 1)) - ${prg_names[$a]}"
 	}
-	data_name=($(sqlite3 mainsb "select name from norm_prg"))
-	mapfile -t norm_names <<< "$data_name"
-	for ((b = 0; b < ${#norm_names[@]}; b++))
-	{
-		echo "$((a + 1)) - ${norm_names[$b]}"
-		a=$a+1
-	}
-	data_name=($(sqlite3 mainsb "select name from comp_prg"))
-	mapfile -t comp_names <<< "$data_name"
-	for ((c = 0; c < ${#comp_names[@]}; c++))
-	{
-		echo "$((a + 1)) - ${comp_names[$c]}"
-		a=$a+1
-	}
-	echo
+	if [[ $SHOW == "all" ]]; then
+		data_name=($(sqlite3 mainsb "select name from norm_prg"))
+		mapfile -t norm_names <<< "$data_name"
+		for ((b = 0; b < ${#norm_names[@]}; b++))
+		{
+			echo "$((a + 1)) - ${norm_names[$b]}"
+			a=$a+1
+		}
+		data_name=($(sqlite3 mainsb "select name from comp_prg"))
+		mapfile -t comp_names <<< "$data_name"
+		for ((c = 0; c < ${#comp_names[@]}; c++))
+		{
+			echo "$((a + 1)) - ${comp_names[$c]}"
+			a=$a+1
+		}
+		echo
+	fi
 	echo "Total: $((a))"
 }
 
@@ -329,12 +384,9 @@ function main_menu()
 	echo_primary "1. Normal installation (${#ncc[@]})"
 	echo_primary "2. Compilers           (${#ccc[@]})"
 	echo_primary "3. Custom list         (${#cucc[@]})"
-	#echo_primary "LainOS Package Downloader V$VERSION"
 }
 
-if [ -z "$*" ] || [ $1 == "-s" ]; then
-	#main_menu
-
+if [ -z "$*" ] || [ $1 == "-s" ] && [[ $MENU == "1" ]]; then
 	while [ true ]
 	do
 		GetCount
@@ -375,7 +427,7 @@ if [ -z "$*" ] || [ $1 == "-s" ]; then
 		fi
 	done
 	
-elif  [ $1 == "-m" ]; then
+elif  [[ $MENU == "0" ]] || [ $1 == "-m" ]; then
 	options=("1. Normal installation (${#ncc[@]})" "2. Compilers           (${#ccc[@]})" "3. Custom list         (${#cucc[@]})")
 	case `select_opt "${options[@]}"` in
 	    0) norm_inst;;
@@ -395,11 +447,13 @@ elif [ $1 == "-c" ]; then
 elif [ $1 == "-i" ]; then
 	custom $2
 elif [ $1 == "-v" ]; then
-	echo $VERSION;
+	echo "v$VERSION";
 elif [ $1 == "-l" ]; then
 	prg_list
-elif [ $1 == "-r" ]; then
+elif [ $1 == "-d" ]; then
 	cus_remove $2
+elif [ $1 == "-r" ]; then
+	echo $REPO;
 else
 	echo_danger "This command is not found !, try ./main --help"
 fi

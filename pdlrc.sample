@@ -1,0 +1,4 @@
+repo=https://codeberg.org/LainOS/PDLP
+## 1 is shell mode and 0 is arrow mode
+menu=1
+list=all
