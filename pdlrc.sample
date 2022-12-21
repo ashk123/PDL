@@ -1,3 +1,7 @@
+## A simple pdl config file
+## you can Copy or Move it to ~/ with name .pdlrc
+## For more information about Config file read README.md
+
 repo=https://codeberg.org/LainOS/PDLP
 ## 1 is shell mode and 0 is arrow mode
 menu=1
