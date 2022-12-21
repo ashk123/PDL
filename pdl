@@ -109,6 +109,7 @@ function select_opt {
     return $result
 }
 
+# New version of PatchAdder (Beta)
 function patch_adder()
 {
 	stext=$1
@@ -128,9 +129,10 @@ function patch_adder()
 			return 0;
 		fi
 	fi	
+
 	file_name=$(sed -n 1p $path)
 	file_name_org=${file_name:7}
-	
+
 	pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg")
 	mapfile pars_names <<< "$pfiles"
 	for ((a = 0; a < ${#pars_names[@]}; a++))
@@ -141,19 +143,78 @@ function patch_adder()
 			return 1;
 		fi
 	}
-
+	org=""
+	num=0;
 	code=$(cat $path | sed '/^[[:space:]]*$/d')
 	mapfile -t data <<< "$code"
-	for ((i = 2; i < ${#data[@]}; i++))
+	for ((i = 1; i < ${#data[@]}; i++))
 	{
+		d=${data[$i]}
 		if [[ ${data[$i]} != "" ]]; then
-			org+="${data[$i]};"
+			if  [[ ${d:0:6} == "--code" ]]; then
+				num="1";
+			elif [[ $num == "1" ]]; then
+				org+="${data[$i]};"
+			elif [[ ${d:0:6} == "--desc" ]]; then
+				num="2";
+			elif [[ $num == "2" ]]; then
+				org_des+="$d\n"
+			fi
+
 		fi
 	}
-	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', 'This is new Program for new mode in PDL', '$org');"
+	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', '$org_des', '$org');"
 	echo_success "[+] The $1 patch file was applied"
 	org=""
+	org_des=""
 }
+
+# Orginal And Ols version of PatchAdder function
+#function patch_adder()
+#{
+#	stext=$1
+#	slen=${#stext}
+#	if [[ ${stext:$((slen - 3)):3} != "pdl" ]]; then
+#		echo_danger "you can't use any file type !";
+#		return 0
+#	fi
+#
+#	if [ -f "$(pwd)/$1" ]; then
+#		path=$1
+#	else
+#		if [ -f "$(pwd)/PDLP/$1" ]; then
+#			path="PDLP/$1"
+#		else
+#			echo "your file is not found !"
+#			return 0;
+#		fi
+#	fi	
+#	file_name=$(sed -n 1p $path)
+#	file_name_org=${file_name:7}
+#	
+#	pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg")
+#	mapfile pars_names <<< "$pfiles"
+#	for ((a = 0; a < ${#pars_names[@]}; a++))
+#	{
+#		org=${pars_names[$a]};
+#		if [[ $file_name_org == ${org:0:-1} ]]; then
+#			echo_danger "you have already had $file_name_org this file !"
+#			return 1;
+#		fi
+#	}
+#
+#	code=$(cat $path | sed '/^[[:space:]]*$/d')
+#	mapfile -t data <<< "$code"
+#	for ((i = 2; i < ${#data[@]}; i++))
+#	{
+#		if [[ ${data[$i]} != "" ]]; then
+#			org+="${data[$i]};"
+#		fi
+#	}
+#	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', 'This is new Program for new mode in PDL', '$org');"
+#	echo_success "[+] The $1 patch file was applied"
+#	org=""
+#}
 
 
 function ConfigCore(){
@@ -326,10 +387,16 @@ function custom_menu()
 	echo ""
 	custs=()
 	cust_names=($(sqlite3 mainsb "select name from cus_prg"))
+	desc_list=($(sqlite3 mainsb "select description from cus_prg"))
 	mapfile -t arr3 <<< "$cust_names"
+	mapfile -t arr4 <<< "$desc_list"
+	echo_secondary "----------------------------\n"
 	for ((i3 = 0; i3 < ${#arr3[@]}; i3++))
 	do
+		
 		echo_secondary "$((i3 + 1)) - ${arr3[$i3]}\n"
+		echo_secondary "\n${arr4[$i3]}\n";
+		echo_secondary "----------------------------\n"
 		custs+=(${arr3[$i3]})
 	done
 	echo ""
