@@ -23,7 +23,7 @@
 VERSION="2.9"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
-CONF_PATH='/home/$(whoami)'
+CONF_PATH=/home/$(whoami)
 MENU='1'
 SHOW='all'
 REPO='https://github.com/ashk123/PDLP'
@@ -193,7 +193,9 @@ $str;
 
 # PDL Banner
 splash "LainOS PRGD - V$VERSION"
-ConfigCore
+if [ -f "$CONF_PATH/.pdlrc" ]; then
+	ConfigCore
+fi
 
 function pe() {
     dpkg -s "$1" &> /dev/null
