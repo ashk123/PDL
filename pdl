@@ -408,7 +408,8 @@ function PreInstall()
 	for ((a = 0; a < ${#tga[@]}; a++))
 	do
 		realname=$(sqlite3 mainsb "select name from cus_prg where filename='${tga[$a]}.pdl';")
-		custom ${tga[$a]};
+		echo $realname
+		custom $realname;
 	done
 	custom $2 2
 }
