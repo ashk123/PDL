@@ -387,7 +387,7 @@ function net()
 		return 0;
 	fi
 
-	git clone "$REPO" -q
+	git clone "$REPO" -b beta_pdlp -q
 	file=$(ls PDLP)
 	mapfile -t files <<< "$file"
 	for ((a = 0; a < ${#files[@]}; a++))
@@ -420,7 +420,6 @@ function Cnet(){
 		echo_error "you don't have git, first you should install git ..."
 		return 0;
 	fi
-
 	git clone https://github.com/ashk123/PDLP -q
 	file=$(ls PDLP)
 	readarray -d " " -t tg <<< "$1"
@@ -432,6 +431,7 @@ function Cnet(){
 	mapfile -t files <<< "$file"
 	for ((a = 0; a < ${#files[@]}; a++))
 	do
+		c=false;
 		for ((b = 0; b < ${#tg[@]}; b++))
 		do
 			parsed_tg=${tg[$b]};
@@ -440,12 +440,21 @@ function Cnet(){
 				
 				patch_adder ${files[$a]}
 				tg[$b]="g";
-				break
+				#break
 			fi
 		done
-		if [[ ${tg[0]} == "g" ]] && [[ ${tg[1]} == "g" ]]; then
+		for ((as = 0; as < ${#tg[@]}; as++))
+		do
+			if [[ ${tg[$as]} != "g" ]]; then
+				c=true;
+			fi
+		done
+		if [ $c = false ]; then
 			break
 		fi
+		#if [[ ${tg[0]} == "g" ]] && [[ ${tg[1]} == "g" ]]; then
+		#	break
+		#fi
 	done
 	rm -rf PDLP
 }
