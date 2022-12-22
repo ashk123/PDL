@@ -26,6 +26,7 @@ OS='LainOS'
 CONF_PATH=/home/$(whoami)
 MENU='1'
 SHOW='all'
+DESC='on'
 REPO='https://github.com/ashk123/PDLP'
 IFS=';'
 
@@ -163,7 +164,7 @@ function patch_adder()
 
 		fi
 	}
-	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', '$org_des', '$org');"
+	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', '$org_des', '$org', '$1');"
 	echo_success "[+] The $1 patch file was applied"
 	org=""
 	org_des=""
@@ -244,6 +245,11 @@ function ConfigCore(){
 	if (( ${#list} > 1 )); then
 		SHOW=$list;
 	fi
+	
+	if (( ${#description} > 1 )); then
+		DESC=$description;
+	fi
+
 }
 
 
@@ -334,16 +340,33 @@ function custom()
 	do
 		if [[ ${dnc[$o]} == $1 ]]; then
 			data_code=$(sqlite3 mainsb "select code from cus_prg where name='$1'")
-			read -a str <<< "$data_code"
+			read -a strq <<< "$data_code"
 			break
 		fi
 	done
-	for ((i = 0; i < ${#str[@]}; i++))
+	dep_line=${strq[0]};
+	if [[ ${dep_line:0:3} == "DEP" ]]; then
+		if [[ $2 != "2" ]]; then
+			dep_value=${dep_line:4:${#dep_line}}
+			spl_data=$dep_value;
+			#readarray -d " " -t strarr <<< "$spl_data"
+			PreInstall $spl_data $1
+			return 1;
+		fi
+	fi
+	echo "------------------------------------"
+	echo $1
+	#if [[ $1 == "just" ]]; then echo "asdkjalksdjaksldjaslkjkasljdkasj"; else echo "a$1.pdl"; fi
+	for ((i = 0; i < ${#strq[@]}; i++))
 	do
-		echo "[!] Executing: ${str[$i]}"
-		eval ${str[$i]}
+		run_data=${strq[$i]}
+		if [[ ${run_data:0:3} != "DEP" ]]; then
+			echo "[!] Executing: ${strq[$i]}"
+			#eval ${strq[$i]}	
+		fi
 	done
 }
+
 
 function GetCount(){
 	norm_count=($(sqlite3 mainsb "select name from norm_prg"))
@@ -374,6 +397,59 @@ function net()
 	rm -rf PDLP
 }
 
+function PreInstall()
+{
+	Cnet $1;
+	readarray -d " " -t tga <<< "$1"
+	len=${#tga[@]}
+	end_item=${tga[$((len - 1))]}
+	len_end_item=${#end_item}
+	tga[$(( len - 1 ))]=${end_item:0:$((len_end_item - 1))};
+	for ((a = 0; a < ${#tga[@]}; a++))
+	do
+		realname=$(sqlite3 mainsb "select name from cus_prg where filename='${tga[$a]}.pdl';")
+		custom ${tga[$a]};
+	done
+	custom $2 2
+}
+
+function Cnet(){
+	if pe "git"; then
+		echo
+	else
+		echo_error "you don't have git, first you should install git ..."
+		return 0;
+	fi
+
+	git clone https://github.com/ashk123/PDLP -q
+	file=$(ls PDLP)
+	readarray -d " " -t tg <<< "$1"
+	len=${#tg[@]}
+	end_item=${tg[$((len - 1))]}
+	len_end_item=${#end_item}
+	tg[$(( len - 1 ))]=${end_item:0:$((len_end_item - 1))};
+	#echo "this is item for Cnet function -> a${tg[1]}a"
+	mapfile -t files <<< "$file"
+	for ((a = 0; a < ${#files[@]}; a++))
+	do
+		for ((b = 0; b < ${#tg[@]}; b++))
+		do
+			parsed_tg=${tg[$b]};
+			#echo "$parsed_tg.pdl == ${files[$a]}" 
+			if [[ "$parsed_tg.pdl" == ${files[$a]} ]]; then
+				
+				patch_adder ${files[$a]}
+				tg[$b]="g";
+				break
+			fi
+		done
+		if [[ ${tg[0]} == "g" ]] && [[ ${tg[1]} == "g" ]]; then
+			break
+		fi
+	done
+	rm -rf PDLP
+}
+
 function choos_item_cust()
 {
 	cust_names=($(sqlite3 mainsb "select name from cus_prg"))
@@ -395,7 +471,9 @@ function custom_menu()
 	do
 		
 		echo_secondary "$((i3 + 1)) - ${arr3[$i3]}\n"
-		echo_secondary "\n${arr4[$i3]}\n";
+		if [[ $DESC == "on" ]]; then
+			echo_info "\n${arr4[$i3]}\n";
+		fi
 		echo_secondary "----------------------------\n"
 		custs+=(${arr3[$i3]})
 	done
@@ -523,6 +601,8 @@ elif [ $1 == "-d" ]; then
 	cus_remove $2
 elif [ $1 == "-r" ]; then
 	echo $REPO;
+elif [ $1 == "install" ]; then
+	PreInstall $2
 else
 	echo_danger "This command is not found !, try ./main --help"
 fi
