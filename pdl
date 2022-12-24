@@ -1,19 +1,19 @@
 #!/usr/bin/bash
 
-# ---- LainOS Team ----
-
 # LainOS Orginal Program 227865 2022
-# This Project Writed for helping you to Install Other Programs
-# Auther: Eiko Akiba
+# This Project Writed for help you to Install Other Programs
+# Writer : Wired
+# ---- For LainOS Team ----
 
 # Information ( Don't change thease texts )
 # default repo is https://github.com/ashk123/PDLP
-# default OS is LainOSu
+# default OS is LainOS
 # default version is 2.9
 # default SHOW is all
 # default MENU is 1
 # default CONF_PATH is ~/.pdlrc
 # pdlrc.sample is a sample config file
+# Auto Patch Creator dependency file is main.dep
 
 # Config Structure
 # your config file should be on ~/.pdlrc ( you can change it on CONF_PATH var )
@@ -110,6 +110,73 @@ function select_opt {
     echo $result
     return $result
 }
+
+function help_information()
+{
+	if [[ $1 == "install" ]]; then
+		echo -ne "-----------------------\n	Install        \n-----------------------\n\n"
+		echo """Install your program with just one argumant
+you can use it when you want to download special program without updating your system
+if program have a dependency, actuly program download dependency too (if you don't have need dep, don't use )
+you can install programs with:
+	pdl install <program>
+	like
+	pdl install nix
+Have good time !
+"""
+	elif [[ $1 == "make" ]]; then
+		echo -ne "--------------------\n	Make        \n--------------------\n\n"
+		echo """you can make your own patch file wihtout any work, just use:
+pdl make <name_patch>
+for making your own patch file
+this maker, see your all files and install your files on correct folders on your system
+you can change it to any you want
+example:
+	pdl make <name>
+	like
+	pdl make new_program
+If you need dependency on your patch file, you can make 'main.dep' file and write your dependencys 
+Notice: ( you should call file main.dep its very important )
+
+Have good day/night !"""
+	fi
+}
+
+function makepatch()
+{
+	org="""--name $1
+--desc :
+this is nice for me
+--code :
+"""
+	files=$(ls $pwd)
+	if [ -f "${pwd}main.dep" ]; then
+		dep=$(cat main.dep);
+		mapfile -t strb <<< "$dep"
+		for ((b = 0; b < ${#strb[@]}; b++))
+		do
+			ddd=${strb[$b]}
+			if [[ ${ddd:0:1} != "#" ]]; then
+				if [[ $ddd != "" ]]; then
+					o+="${strb[$b]} ";
+				fi
+			fi
+		done
+		org+="DEP ${o:0:$(( ${#o} - 1))}\n"
+	fi
+	mapfile -t stra <<< "$files"
+	for ((a = 0; a < ${#stra[@]}; a++))
+	do
+		res=$(file ${stra[$a]})
+		if [[ $res =~ "ELF" ]]; then
+			echo "File ${stra[$a]} is binary !";
+			org+="sudo cp $pwd/${stra[$a]} /usr/local/bin\n"
+		fi
+	done
+	echo -en $org > setup.pdl
+#	patch_adder $1.pdl
+}
+
 
 # New version of PatchAdder (Beta)
 function patch_adder()
@@ -296,6 +363,12 @@ function help()
 	echo_secondary "-u/--update       "; echo_info "update patch files from PDLP git repository"
 	echo_secondary "-d       	  "; echo_info "Remove Program with name"
 	echo_secondary "-r       	  "; echo_info "Print repository that pdl currently use"
+	echo_secondary "install       	  "; echo_info "Install any program from git repository"
+	echo_secondary "make       	  "; echo_info "Create Auto patch file (setup.pdl)"
+	echo_primary "----------------------------------------------------"
+	echo_secondary "help <content>    "; echo_info "You can see each information (HOWTO) content"
+
+
 }
 
 function comp_inst()
@@ -612,8 +685,12 @@ elif [ $1 == "-d" ]; then
 	cus_remove $2
 elif [ $1 == "-r" ]; then
 	echo $REPO;
+elif [ $1 == "make" ]; then
+	makepatch $2
 elif [ $1 == "install" ]; then
 	PreInstall $2
+elif [ $1 == "help" ]; then
+	help_information $2
 else
 	echo_danger "This command is not found !, try ./main --help"
 fi
