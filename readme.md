@@ -1,6 +1,6 @@
 Document of PDL ( package downloading lainOS )
 
-- Description
+# Description
 
         PDL is a small tool for downloading and installing packages, its not a package system, its sub-package system
         (you can read more about it in sub-package system side)
@@ -10,20 +10,20 @@ Document of PDL ( package downloading lainOS )
         You can made a .pdl file and share it with your friend, or push it into PDL repository
         we made this just for fun!, you can use it for your important works or fun moments
 
-- PDL git repository
+# PDL git repository
 
         PDL have a git repository in laingit and github, you can choose one of these options for your work
         in client, when you want to update your pfl files, you can choose your repository
         for uploading, we must see all your installation commands, after that we save it into repository
 
-- Why PDL ?
+# Why PDL ?
 
         PDL just created for reason to have a visual package downloader in LainOS
         we don't wanted to create a main packaging system like apt or any things like that
         we made a simple program for users that people can understand easily, how package downloaders work
         you can use or not, its your choice, it's easy for work and install. (check LainOS website for new updates)
 
-- Can I work on it as FAN ?
+# Can I work on it as FAN ?
 
         Absolutely yes!, we want other users made better features for PDL
         If you want to made your custom PDL, you should do these works :
@@ -32,11 +32,11 @@ Document of PDL ( package downloading lainOS )
         3. push it into your own github and send your git-rep link to us <br>
         3-2. or send .zip file as a email to us
 
-- Dev Information
+# Dev Information
 
         Database: sqlite3 V3.34.1 <br>
         Programming Language: Bash V5.1.4 <br>
         OS: LainOS (debian)
 
 
-- Have good time with PDL !
+# Have good time with PDL !
