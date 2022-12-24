@@ -1,13 +1,14 @@
 #!/usr/bin/bash
 
+# ---- LainOS Team ----
+
 # LainOS Orginal Program 227865 2022
-# This Project Writed for help you to Install Other Programs
-# Writer : Wired
-# ---- For LainOS Team ----
+# This Project Writed for helping you to Install Other Programs
+# Auther: Eiko Akiba
 
 # Information ( Don't change thease texts )
 # default repo is https://github.com/ashk123/PDLP
-# default OS is LainOS
+# default OS is LainOSu
 # default version is 2.9
 # default SHOW is all
 # default MENU is 1
