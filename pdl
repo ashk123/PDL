@@ -23,7 +23,7 @@
 VERSION="2.9"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
-CONF_PATH=/home/$(whoami)
+CONF_PATH=$HOME
 MENU='1'
 SHOW='all'
 REPO='https://github.com/ashk123/PDLP'
@@ -115,7 +115,7 @@ function patch_adder()
 	stext=$1
 	slen=${#stext}
 	if [[ ${stext:$((slen - 3)):3} != "pdl" ]]; then
-		echo_danger "you can't use any file type !";
+		echo_danger "You can't use any file type, it must be a .pdl patch file!";
 		return 0
 	fi
 
@@ -125,10 +125,10 @@ function patch_adder()
 		if [ -f "$(pwd)/PDLP/$1" ]; then
 			path="PDLP/$1"
 		else
-			echo "your file is not found !"
+			echo "Your file was not found!"
 			return 0;
 		fi
-	fi	
+	fi
 
 	file_name=$(sed -n 1p $path)
 	file_name_org=${file_name:7}
@@ -139,7 +139,7 @@ function patch_adder()
 	{
 		org=${pars_names[$a]};
 		if [[ $file_name_org == ${org:0:-1} ]]; then
-			echo_danger "you have already had $file_name_org this file !"
+			echo_danger "You have already have $file_name_org patch file!"
 			return 1;
 		fi
 	}
@@ -216,7 +216,6 @@ function patch_adder()
 #	org=""
 #}
 
-
 function ConfigCore(){
 	shopt -s extglob
 	configfile="$CONF_PATH/.pdlrc" 	
@@ -270,10 +269,10 @@ function help()
 	echo_primary "Description :"
 	echo_secondary "	This tool helps you to download and install packages that you can see in APT-REP or GIT-REP\n"
 	echo_secondary "  	We use Save installer commands into a database and you can install all packages with one click\n"
-	echo_secondary "	You should have GIT for download from github\n"
+	echo_secondary "	You should have GIT for download from remote repository\n"
 	echo_secondary "	Is git available? "
 	if pe "git"; then
-		echo_success "Yes"
+		echo_success "Yes!"
 	else
 		echo_danger "No!"
 	fi
@@ -287,8 +286,9 @@ function help()
 	echo_secondary "-i         	  "; echo_info "install custom programs"
 	echo_secondary "-l		  "; echo_info "list all programs and PDL patch files that currently PDL have"
 	echo_secondary "-u/--update       "; echo_info "update patch files from PDLP git repository"
-	echo_secondary "-d       	  "; echo_info "Remove Program with name"
-	echo_secondary "-r       	  "; echo_info "Print repository that pdl currently use"
+	echo_secondary "-d       	  "; echo_info "remove program with name"
+	echo_secondary "-r       	  "; echo_info "print repository that pdl is currently using"
+	echo_secondary "-v       	  "; echo_info "print version information"
 }
 
 function comp_inst()
@@ -322,7 +322,7 @@ function norm_inst()
 function customize_installation()
 {
 	local t=$1
-	echo "[+] $t item is added to your program list ."
+	echo "[+] $t item is added to your program list."
 	cust+=($t)
 }
 
@@ -340,7 +340,8 @@ function custom()
 	done
 	for ((i = 0; i < ${#str[@]}; i++))
 	do
-		echo "[!] Executing: ${str[$i]}"
+		echo_label "[!] Executing"
+		echo_info ${str[$i]}
 		eval ${str[$i]}
 	done
 }
@@ -360,7 +361,7 @@ function net()
 	if pe "git"; then
 		echo
 	else
-		echo_error "you don't have git, first you should install git ..."
+		echo_error "You don't have git installed, you should install git first ..."
 		return 0;
 	fi
 
@@ -383,7 +384,7 @@ function choos_item_cust()
 
 function custom_menu()
 {
-	echo_label "\nyou have these options";
+	echo_label "\nYou have these options";
 	echo ""
 	custs=()
 	cust_names=($(sqlite3 mainsb "select name from cus_prg"))
@@ -393,17 +394,16 @@ function custom_menu()
 	echo_secondary "----------------------------\n"
 	for ((i3 = 0; i3 < ${#arr3[@]}; i3++))
 	do
-		
 		echo_secondary "$((i3 + 1)) - ${arr3[$i3]}\n"
 		echo_secondary "\n${arr4[$i3]}\n";
 		echo_secondary "----------------------------\n"
 		custs+=(${arr3[$i3]})
 	done
 	echo ""
-	read -p "Package Name: " pck_name
+	read -p "Package number: " pck_name
 	case $pck_name in
 		''|*[!0-9]*)
-			echo_error "not a number"
+			echo_error "Not a number! You must enter a valid number."
 		;;
 		*)
 			num=$((pck_name - 1))
@@ -444,7 +444,7 @@ function cus_remove()
 {
 	# Sql-Injection Zone - we should check value or better way use regex
 	sqlite3 mainsb "delete from cus_prg where name = '$1'"
-	echo "[+] Package $1 is remove from custome packages"
+	echo "[+] Package $1 removed from custom packages"
 }
 
 function main_menu()
@@ -524,5 +524,5 @@ elif [ $1 == "-d" ]; then
 elif [ $1 == "-r" ]; then
 	echo $REPO;
 else
-	echo_danger "This command is not found !, try ./main --help"
+	echo_danger "That was not a valid command!, try ./pdl --help"
 fi
