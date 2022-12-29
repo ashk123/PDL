@@ -179,6 +179,20 @@ this is nice for me
 }
 
 
+function Find(){
+	pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg")
+	mapfile pars_names <<< "$pfiles"
+	for ((a = 0; a < ${#pars_names[@]}; a++))
+	{
+		org=${pars_names[$a]};
+		if [[ $1 == ${org:0:-1} ]]; then
+			echo_danger "you have already had $1 this file !"
+			return 1;
+		fi
+	}
+	return 0;
+}
+
 # New version of PatchAdder (Beta)
 function patch_adder()
 {
@@ -203,16 +217,22 @@ function patch_adder()
 	file_name=$(sed -n 1p $path)
 	file_name_org=${file_name:7}
 
-	pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg")
-	mapfile pars_names <<< "$pfiles"
-	for ((a = 0; a < ${#pars_names[@]}; a++))
-	{
-		org=${pars_names[$a]};
-		if [[ $file_name_org == ${org:0:-1} ]]; then
-			echo_danger "you have already had $file_name_org this file !"
-			return 1;
-		fi
-	}
+	#pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg")
+	#mapfile pars_names <<< "$pfiles"
+	#for ((a = 0; a < ${#pars_names[@]}; a++))
+	#{
+	#	org=${pars_names[$a]};
+	#	if [[ $file_name_org == ${org:0:-1} ]]; then
+	#		echo_danger "you have already had $file_name_org this file !"
+	#		return 1;
+	#	fi
+	#}
+
+	Find $file_name_org
+	res=$?
+	if [[ $res -eq 1 ]]; then
+		return 1;
+	fi
 	
 	org=""
 	num=0;
@@ -587,8 +607,15 @@ function prg_list()
 function cus_remove()
 {
 	# Sql-Injection Zone - we should check value or better way use regex
-	sqlite3 mainsb "delete from cus_prg where name = '$1'"
-	echo "[+] Package $1 is remove from custome packages"
+	Find $1
+	res=$?
+	#echo $res;
+	if [[ $res -eq 1 ]]; then
+		sqlite3 mainsb "delete from cus_prg where name = '$1'"
+		echo "[+] Package $1 is remove from custome packages"
+	else
+		echo "I can't find your package !"
+	fi
 }
 
 function main_menu()
@@ -671,6 +698,8 @@ elif [ $1 == "make" ]; then
 	makepatch $2
 elif [ $1 == "install" ]; then
 	LocalInstall $2
+elif [ $1 == "remove" ]; then
+	cus_remove $2;
 elif [ $1 == "help" ]; then
 	help_information $2
 else
