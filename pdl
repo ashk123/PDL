@@ -172,6 +172,9 @@ this is nice for me
 		if [[ $res =~ "ELF" ]]; then
 			echo "File ${stra[$a]} is binary !";
 			org+="sudo cp $pwd/${stra[$a]} /usr/local/bin\n"
+		elif [[ ${stra[$a]} == "Makefile" ]]; then
+			org+="make\n"
+			org+="sudo make install\n"
 		fi
 	done
 	echo -en $org > setup.pdl
