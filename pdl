@@ -21,8 +21,6 @@
 # show: how menu start when you run pdl
 # list: when you use -l, which group of programs that pdl should show you
 
-# DEV information
-# curl -X GET -u ashk123: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 https://api.github.com/repos/ashk123/PDLP/contents/welcome.pdl
 
 VERSION="2.9"
 NAME="LainOS LPD Package Downloader"
@@ -478,7 +476,6 @@ function net()
 
 function PreInstall()
 {
-	#Cnet $1;
 	GetAll $1;
 	readarray -d " " -t tga <<< "$1"
 	len=${#tga[@]}
@@ -514,50 +511,9 @@ function Cneto() {
 	rm $1.pdl
 }
 
-function Cnet(){
-	if pe "git"; then
-		echo
-	else
-		echo_error "you don't have git, first you should install git ..."
-		return 0;
-	fi
-	git clone https://github.com/ashk123/PDLP -q
-	file=$(ls PDLP)
-	readarray -d " " -t tg <<< "$1"
-	len=${#tg[@]}
-	end_item=${tg[$((len - 1))]}
-	len_end_item=${#end_item}
-	tg[$(( len - 1 ))]=${end_item:0:$((len_end_item - 1))};
-	#echo "this is item for Cnet function -> a${tg[1]}a"
-	mapfile -t files <<< "$file"
-	for ((a = 0; a < ${#files[@]}; a++))
-	do
-		c=false;
-		for ((b = 0; b < ${#tg[@]}; b++))
-		do
-			parsed_tg=${tg[$b]};
-			#echo "$parsed_tg.pdl == ${files[$a]}" 
-			if [[ "$parsed_tg.pdl" == ${files[$a]} ]]; then
-				
-				patch_adder ${files[$a]}
-				tg[$b]="g";
-				#break
-			fi
-		done
-		for ((as = 0; as < ${#tg[@]}; as++))
-		do
-			if [[ ${tg[$as]} != "g" ]]; then
-				c=true;
-			fi
-		done
-		if [ $c = false ]; then
-			break
-		fi
-		#if [[ ${tg[0]} == "g" ]] && [[ ${tg[1]} == "g" ]]; then
-		#	break
-		#fi
-	done
-	rm -rf PDLP
+function LocalInstall(){
+	Cneto $1;
+	custom $1;
 }
 
 function choos_item_cust()
@@ -714,7 +670,7 @@ elif [ $1 == "-r" ]; then
 elif [ $1 == "make" ]; then
 	makepatch $2
 elif [ $1 == "install" ]; then
-	Cneto $2
+	LocalInstall $2
 elif [ $1 == "help" ]; then
 	help_information $2
 else
