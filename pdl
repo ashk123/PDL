@@ -21,6 +21,9 @@
 # show: how menu start when you run pdl
 # list: when you use -l, which group of programs that pdl should show you
 
+# DEV information
+# curl -X GET -u ashk123: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 https://api.github.com/repos/ashk123/PDLP/contents/welcome.pdl
+
 VERSION="2.9"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
@@ -181,11 +184,12 @@ this is nice for me
 # New version of PatchAdder (Beta)
 function patch_adder()
 {
+	echo $1;
 	stext=$1
 	slen=${#stext}
 	if [[ ${stext:$((slen - 3)):3} != "pdl" ]]; then
 		echo_danger "you can't use any file type !";
-		return 0
+		return 1;
 	fi
 
 	if [ -f "$(pwd)/$1" ]; then
@@ -198,7 +202,6 @@ function patch_adder()
 			return 0;
 		fi
 	fi	
-
 	file_name=$(sed -n 1p $path)
 	file_name_org=${file_name:7}
 
@@ -212,6 +215,7 @@ function patch_adder()
 			return 1;
 		fi
 	}
+	
 	org=""
 	num=0;
 	code=$(cat $path | sed '/^[[:space:]]*$/d')
@@ -236,6 +240,7 @@ function patch_adder()
 	echo_success "[+] The $1 patch file was applied"
 	org=""
 	org_des=""
+	num=0;
 }
 
 # Orginal And Ols version of PatchAdder function
@@ -473,7 +478,8 @@ function net()
 
 function PreInstall()
 {
-	Cnet $1;
+	#Cnet $1;
+	GetAll $1;
 	readarray -d " " -t tga <<< "$1"
 	len=${#tga[@]}
 	end_item=${tga[$((len - 1))]}
@@ -486,6 +492,26 @@ function PreInstall()
 		custom $realname;
 	done
 	custom $2 2
+}
+
+function GetAll()
+{
+	readarray -d " " -t tg <<< "$1"
+	len=${#tg[@]}
+	end_item=${tg[$((len - 1))]}
+	len_end_item=${#end_item}
+	tg[$(( len - 1 ))]=${end_item:0:$((len_end_item - 1))};
+	
+	for ((as = 0; as < $len; as++))
+	do
+		Cneto ${tg[$as]}
+	done
+}
+
+function Cneto() {
+	curl -s https://raw.githubusercontent.com/ashk123/PDLP/beta_pdlp/$1.pdl > $1.pdl;
+	patch_adder "$1.pdl";
+	rm $1.pdl
 }
 
 function Cnet(){
@@ -688,7 +714,7 @@ elif [ $1 == "-r" ]; then
 elif [ $1 == "make" ]; then
 	makepatch $2
 elif [ $1 == "install" ]; then
-	PreInstall $2
+	Cneto $2
 elif [ $1 == "help" ]; then
 	help_information $2
 else
