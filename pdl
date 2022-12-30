@@ -20,9 +20,9 @@
 # repo: its a repo git address like https://yourgitservice/yourusername/yourpdlpreponame
 # show: how menu start when you run pdl
 # list: when you use -l, which group of programs that pdl should show you
+# description: turn on or off information on custome list
 
-
-VERSION="2.9"
+VERSION="3.5"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
 CONF_PATH=/home/$(whoami)
@@ -220,17 +220,6 @@ function patch_adder()
 	file_name=$(sed -n 1p $path)
 	file_name_org=${file_name:7}
 
-	#pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg")
-	#mapfile pars_names <<< "$pfiles"
-	#for ((a = 0; a < ${#pars_names[@]}; a++))
-	#{
-	#	org=${pars_names[$a]};
-	#	if [[ $file_name_org == ${org:0:-1} ]]; then
-	#		echo_danger "you have already had $file_name_org this file !"
-	#		return 1;
-	#	fi
-	#}
-
 	Find $file_name_org
 	res=$?
 	if [[ $res -eq 1 ]]; then
@@ -263,53 +252,6 @@ function patch_adder()
 	org_des=""
 	num=0;
 }
-
-# Orginal And Ols version of PatchAdder function
-#function patch_adder()
-#{
-#	stext=$1
-#	slen=${#stext}
-#	if [[ ${stext:$((slen - 3)):3} != "pdl" ]]; then
-#		echo_danger "you can't use any file type !";
-#		return 0
-#	fi
-#
-#	if [ -f "$(pwd)/$1" ]; then
-#		path=$1
-#	else
-#		if [ -f "$(pwd)/PDLP/$1" ]; then
-#			path="PDLP/$1"
-#		else
-#			echo "your file is not found !"
-#			return 0;
-#		fi
-#	fi	
-#	file_name=$(sed -n 1p $path)
-#	file_name_org=${file_name:7}
-#	
-#	pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg")
-#	mapfile pars_names <<< "$pfiles"
-#	for ((a = 0; a < ${#pars_names[@]}; a++))
-#	{
-#		org=${pars_names[$a]};
-#		if [[ $file_name_org == ${org:0:-1} ]]; then
-#			echo_danger "you have already had $file_name_org this file !"
-#			return 1;
-#		fi
-#	}
-#
-#	code=$(cat $path | sed '/^[[:space:]]*$/d')
-#	mapfile -t data <<< "$code"
-#	for ((i = 2; i < ${#data[@]}; i++))
-#	{
-#		if [[ ${data[$i]} != "" ]]; then
-#			org+="${data[$i]};"
-#		fi
-#	}
-#	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', 'This is new Program for new mode in PDL', '$org');"
-#	echo_success "[+] The $1 patch file was applied"
-#	org=""
-#}
 
 
 function ConfigCore(){
@@ -609,10 +551,8 @@ function prg_list()
 
 function cus_remove()
 {
-	# Sql-Injection Zone - we should check value or better way use regex
 	Find $1
 	res=$?
-	#echo $res;
 	if [[ $res -eq 1 ]]; then
 		sqlite3 mainsb "delete from cus_prg where name = '$1'"
 		echo "[+] Package $1 is remove from custome packages"
