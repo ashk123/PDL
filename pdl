@@ -409,6 +409,49 @@ function custom()
 	done
 }
 
+function Search()
+{
+	asd=$(curl -s https://api.github.com/repos/ashk123/PDLP/contents | grep name | tr -d "," | tr -d "    ")	
+	asd=${asd//\"/""}
+	mapfile tg <<< "$asd";
+	chs=false;
+	num=0;
+	org_des="";
+	for ((a = 0; a < ${#tg[@]}; a++))
+	do
+		readarray -d ':' -t new_str <<< "${tg[$a]}"
+		org=$(echo ${new_str[1]} | tr -d "\n")
+		if [[ $1.pdl == $org ]]; then
+			chs=true;
+			code=$(curl -s https://raw.githubusercontent.com/ashk123/PDLP/master/$1.pdl)
+			mapfile -t data <<< "$code"
+			for ((i = 1; i < ${#data[@]}; i++))
+			{
+				d=${data[$i]}
+				if [[ ${data[$i]} != "" ]]; then
+					if  [[ ${d:0:6} == "--code" ]]; then
+						nuum=0;
+						break
+					fi
+					if [[ ${d:0:6} == "--desc" ]]; then
+						num="2";
+					elif [[ $num == "2" ]]; then
+						org_des+="$d\n"
+					fi
+
+				fi
+			}
+			echo_info "Package Name: $1"
+			echo_info "Description :\n"
+			echo_info $org_des
+			break;
+		fi
+	done
+	if [ $chs == false ]; then
+		echo_danger "I can't find your patch file !"
+	fi
+}
+
 
 function GetCount(){
 	norm_count=($(sqlite3 mainsb "select name from norm_prg"))
@@ -645,6 +688,8 @@ elif [ $1 == "remove" ]; then
 	cus_remove $2;
 elif [ $1 == "help" ]; then
 	help_information $2
+elif [ $1 == "search" ]; then
+	Search $2;
 else
 	echo_danger "This command is not found !, try ./main --help"
 fi
