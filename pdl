@@ -328,6 +328,7 @@ function customize_installation()
 
 function custom()
 {
+
 	data_name=($(sqlite3 mainsb "select name from cus_prg"))
 	mapfile -t dnc <<< "$data_name"
 	for ((o = 0; o < ${#dnc[@]}; o++))
@@ -343,6 +344,7 @@ function custom()
 		echo "[!] Executing: ${str[$i]}"
 		eval ${str[$i]}
 	done
+	cd -;
 }
 
 function GetCount(){
