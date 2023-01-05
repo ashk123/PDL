@@ -328,7 +328,7 @@ function customize_installation()
 
 function custom()
 {
-
+	dsa=$(realpath pdl)
 	data_name=($(sqlite3 mainsb "select name from cus_prg"))
 	mapfile -t dnc <<< "$data_name"
 	for ((o = 0; o < ${#dnc[@]}; o++))
@@ -344,7 +344,8 @@ function custom()
 		echo "[!] Executing: ${str[$i]}"
 		eval ${str[$i]}
 	done
-	cd -;
+	#cd -;
+	cd "${dsa:0:$((${#dsa} - 3))}"
 }
 
 function GetCount(){
