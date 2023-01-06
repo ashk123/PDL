@@ -2,7 +2,7 @@
 
 # LainOS Orginal Program 227865 2022
 # This Project Writed for help you to Install Other Programs
-# Writer : Wired
+# Writer : Eiko Akiba
 # ---- For LainOS Team ----
 
 # Information ( Don't change thease texts )
@@ -141,6 +141,12 @@ If you need dependency on your patch file, you can make 'main.dep' file and writ
 Notice: ( you should call file main.dep its very important )
 
 Have good day/night !"""
+	elif [[ $1 == "search" ]]; then
+		echo -ne "--------------------\n	Search        \n--------------------\n\n"
+		echo """You can search packages ( patch files ) from repo that you config it on pdlrc
+For example:
+	pdl search <patch_file>
+"""
 	fi
 }
 
@@ -334,6 +340,7 @@ function help()
 	echo_secondary "-r       	  "; echo_info "Print repository that pdl currently use"
 	echo_secondary "install       	  "; echo_info "Install any program from git repository"
 	echo_secondary "make       	  "; echo_info "Create Auto patch file (setup.pdl)"
+	echo_secondary "search       	  "; echo_info "Search your patch file ( depend on what repo do you config )"
 	echo_primary "----------------------------------------------------"
 	echo_secondary "help <content>    "; echo_info "You can see each information (HOWTO) content"
 
