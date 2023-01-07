@@ -23,7 +23,7 @@
 # list: when you use -l, which group of programs that pdl should show you
 # description: turn on or off information on custome list
 
-VERSION="3.9"
+VERSION="3.9 (beta)"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
 CONF_PATH=/home/$(whoami)
