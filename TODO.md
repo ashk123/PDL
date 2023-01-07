@@ -11,3 +11,4 @@ LainOS Team
 - make more than 1 repo for users ( users can set more than 1 repo ) []
 - Download path files from repo based on branch []
 - Add Query Searcher [+]
+- Change net menu
