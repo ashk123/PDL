@@ -522,7 +522,14 @@ function GetAll()
 }
 
 function Cneto() {
-	curl -s https://raw.githubusercontent.com/$API_REPO/beta_pdlp/$1.pdl > $1.pdl;
+	#dsa=$(curl -s https://raw.githubusercontent.com/$API_REPO/beta_pdlp/$1.pdl) > $1.pdl;
+	dsa=$(curl -s https://raw.githubusercontent.com/$API_REPO/beta_pdlp/$1.pdl);
+	echo $dsa > $1.pdl
+	if [[ $dsa =~ "404" ]]; then
+		echo "I can't find your patch file !";
+		rm $1.pdl
+		return 1;
+	fi
 	patch_adder "$1.pdl";
 	rm $1.pdl
 }
@@ -530,6 +537,11 @@ function Cneto() {
 function LocalInstall(){
 	Cneto $1;
 	custom $1;
+}
+
+function menu_install()
+{
+	Cneto $1;
 }
 
 function choos_item_cust()
@@ -570,6 +582,13 @@ function custom_menu()
 			custom ${custs[num]}
 		;;
 	esac
+}
+
+function custome_menu_2()
+{
+	echo -ne "\n"
+	read -p "Enter your patch name: " pfn
+	menu_install $pfn;
 }
 
 function prg_list()
@@ -633,7 +652,8 @@ if [ -z "$*" ] || [ $1 == "-s" ] && [[ $MENU == "1" ]]; then
 		elif [[ $selc == "2" ]]; then
 			comp_inst;
 		elif [[ $selc == "3" ]]; then
-			custom_menu
+			#custom_menu
+			custome_menu_2
 		elif [[ $selc == "list 1" ]] || [[ $selc == "l 1" ]]; then
 			echo_primary "\n-- Normal installation packages --"
 			data=($(sqlite3 mainsb 'select name from norm_prg'))
