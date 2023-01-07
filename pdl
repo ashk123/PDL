@@ -405,8 +405,8 @@ function custom()
 			return 1;
 		fi
 	fi
-	echo "------------------------------------"
-	echo $1
+	#echo "------------------------------------"
+	#echo $1
 	#if [[ $1 == "just" ]]; then echo "asdkjalksdjaksldjaslkjkasljdkasj"; else echo "a$1.pdl"; fi
 	for ((i = 0; i < ${#strq[@]}; i++))
 	do
@@ -542,7 +542,20 @@ function LocalInstall(){
 
 function menu_install()
 {
-	Cneto $1;
+	work=false;
+	data_name=($(sqlite3 mainsb "select name from cus_prg"))
+	mapfile -t dnc <<< "$data_name"
+	for ((o = 0; o < ${#dnc[@]}; o++))
+	do
+		if [[ ${dnc[$o]} == $1 ]]; then
+			work=true
+			break
+		fi
+	done
+	if [[ $work == false ]]; then
+		Cneto $1;
+	fi;
+	custom $1;
 }
 
 function choos_item_cust()
@@ -671,6 +684,8 @@ if [ -z "$*" ] || [ $1 == "-s" ] && [[ $MENU == "1" ]]; then
 			do
 				echo_secondary "[+] Package ${arr[$i2]}\n"
 			done
+		elif [[ $selc == "l" ]]; then
+			prg_list;
 		elif [[ $selc == "exit" ]] || [[ $selc == "q" ]]; then
 			break
 		elif [[ $selc == "version" ]]; then
@@ -719,6 +734,8 @@ elif [ $1 == "help" ]; then
 	help_information $2
 elif [ $1 == "search" ]; then
 	Search $2;
+elif [ $1 == "--version" ] || [ $1 == "-v" ]; then
+	echo $VERSION;
 else
 	echo_danger "This command is not found !, try ./main --help"
 fi

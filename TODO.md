@@ -12,3 +12,4 @@ LainOS Team
 - Download path files from repo based on branch []
 - Add Query Searcher [+]
 - Change net menu
+- Run localy patch file if they exists [+]
