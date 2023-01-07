@@ -526,7 +526,7 @@ function Cneto() {
 	dsa=$(curl -s https://raw.githubusercontent.com/$API_REPO/beta_pdlp/$1.pdl);
 	echo $dsa > $1.pdl
 	if [[ $dsa =~ "404" ]]; then
-		echo "I can't find your patch file !";
+		echo_danger "I can't find your patch file !";
 		rm $1.pdl
 		return 1;
 	fi
