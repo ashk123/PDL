@@ -32,7 +32,7 @@ SHOW='all'
 DESC='on'
 REPO='https://github.com/ashk123/PDLP'
 API_REPO=${REPO:19:${#REPO}}
-IFS=';'
+IFS='*'
 
 
 function echo_title() {     echo -ne "\033[1;44;37m${*}\033[0m\n"; }
@@ -235,6 +235,7 @@ function patch_adder()
 	fi
 	
 	org=""
+	uncode=""
 	num=0;
 	code=$(cat $path | sed '/^[[:space:]]*$/d')
 	mapfile -t data <<< "$code"
@@ -244,17 +245,21 @@ function patch_adder()
 		if [[ ${data[$i]} != "" ]]; then
 			if  [[ ${d:0:6} == "--code" ]]; then
 				num="1";
+			elif [[ ${d:0:8} == "--uninst" ]]; then
+				num="3";
 			elif [[ $num == "1" ]]; then
-				org+="${data[$i]};"
+				org+="${data[$i]}*"
 			elif [[ ${d:0:6} == "--desc" ]]; then
 				num="2";
 			elif [[ $num == "2" ]]; then
 				org_des+="$d\n"
+			elif [[ $num == "3" ]]; then
+				uncode+="$d*";
 			fi
 
 		fi
 	}
-	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', '$org_des', '$org', '$1');"
+	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', '$org_des', '$org', '$1', '$uncode');"
 	echo_success "[+] The $1 patch file was applied"
 	org=""
 	org_des=""
@@ -408,14 +413,42 @@ function custom()
 	#echo "------------------------------------"
 	#echo $1
 	#if [[ $1 == "just" ]]; then echo "asdkjalksdjaksldjaslkjkasljdkasj"; else echo "a$1.pdl"; fi
+	out_path="/tmp/$(( RANDOM % 100 )).sh"
+	echo "#!/usr/bin/bash" >> $out_path
 	for ((i = 0; i < ${#strq[@]}; i++))
 	do
 		run_data=${strq[$i]}
 		if [[ ${run_data:0:3} != "DEP" ]]; then
 			echo "[!] Executing: ${strq[$i]}"
-			#eval ${strq[$i]}	
+			echo ${strq[$i]} >> $out_path
 		fi
 	done
+	chmod +x "$out_path"
+	source "$out_path"
+	rm $out_path
+}
+function Uninstall()
+{
+	data_name=($(sqlite3 mainsb "select name from cus_prg"))
+	mapfile -t dnc <<< "$data_name"
+	for ((o = 0; o < ${#dnc[@]}; o++))
+	do
+		if [[ ${dnc[$o]} == $1 ]]; then
+			data_code=$(sqlite3 mainsb "select uncode from cus_prg where name='$1'")
+			read -a strq <<< "$data_code"
+			break
+		fi
+	done
+	out_path="/tmp/$(( $RANDOM % 10 )).run"
+	echo "#!/usr/bin/bash" >> $out_path
+	for ((i = 0; i < ${#strq[@]}; i++))
+	do
+		run_data=${strq[$i]}
+		echo $run_data >> $out_path;
+	done
+	chmod +x "$out_path"
+	source "$out_path"
+	rm $out_path
 }
 
 function Search()
@@ -734,6 +767,8 @@ elif [ $1 == "help" ]; then
 	help_information $2
 elif [ $1 == "search" ]; then
 	Search $2;
+elif [ $1 == "uninstall" ]; then
+	Uninstall $2;
 elif [ $1 == "--version" ] || [ $1 == "-v" ]; then
 	echo $VERSION;
 else
