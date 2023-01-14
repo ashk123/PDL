@@ -1,8 +1,9 @@
 #!/usr/bin/bash
 
-# LainOS Orginal Program 227865 2022
+# LainOS Orginal Program 237865 2023
 # This Project Writed for help you to Install Other Programs
 # Writer : Eiko Akiba
+
 # ---- For LainOS Team ----
 
 # Information ( Don't change thease texts )
@@ -13,21 +14,25 @@
 # default MENU is 1
 # default CONF_PATH is ~/.pdlrc
 # pdlrc.sample is a sample config file
+# Auto Patch Creator dependency file is main.dep
 
 # Config Structure
 # your config file should be on ~/.pdlrc ( you can change it on CONF_PATH var )
 # repo: its a repo git address like https://yourgitservice/yourusername/yourpdlpreponame
 # show: how menu start when you run pdl
 # list: when you use -l, which group of programs that pdl should show you
+# description: turn on or off information on custome list
 
-VERSION="2.9"
+VERSION="3.9 (beta)"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
 CONF_PATH=/home/$(whoami)
 MENU='1'
 SHOW='all'
+DESC='on'
 REPO='https://github.com/ashk123/PDLP'
-IFS=';'
+API_REPO=${REPO:19:${#REPO}}
+IFS='*'
 
 
 function echo_title() {     echo -ne "\033[1;44;37m${*}\033[0m\n"; }
@@ -109,14 +114,105 @@ function select_opt {
     return $result
 }
 
+function help_information()
+{
+	if [[ $1 == "install" ]]; then
+		echo -ne "-----------------------\n	Install        \n-----------------------\n\n"
+		echo """Install your program with just one argumant
+you can use it when you want to download special program without updating your system
+if program have a dependency, actuly program download dependency too (if you don't have need dep, don't use )
+you can install programs with:
+	pdl install <program>
+	like
+	pdl install nix
+Have good time !
+"""
+	elif [[ $1 == "make" ]]; then
+		echo -ne "--------------------\n	Make        \n--------------------\n\n"
+		echo """you can make your own patch file wihtout any work, just use:
+pdl make <name_patch>
+for making your own patch file
+this maker, see your all files and install your files on correct folders on your system
+you can change it to any you want
+example:
+	pdl make <name>
+	like
+	pdl make new_program
+If you need dependency on your patch file, you can make 'main.dep' file and write your dependencys 
+Notice: ( you should call file main.dep its very important )
+
+Have good day/night !"""
+	elif [[ $1 == "search" ]]; then
+		echo -ne "--------------------\n	Search        \n--------------------\n\n"
+		echo """You can search packages ( patch files ) from repo that you config it on pdlrc
+For example:
+	pdl search <patch_file>
+"""
+	fi
+}
+
+function makepatch()
+{
+	org="""--name $1
+--desc :
+this is nice for me
+--code :
+"""
+	files=$(ls $pwd)
+	if [ -f "${pwd}main.dep" ]; then
+		dep=$(cat main.dep);
+		mapfile -t strb <<< "$dep"
+		for ((b = 0; b < ${#strb[@]}; b++))
+		do
+			ddd=${strb[$b]}
+			if [[ ${ddd:0:1} != "#" ]]; then
+				if [[ $ddd != "" ]]; then
+					o+="${strb[$b]} ";
+				fi
+			fi
+		done
+		org+="DEP ${o:0:$(( ${#o} - 1))}\n"
+	fi
+	mapfile -t stra <<< "$files"
+	for ((a = 0; a < ${#stra[@]}; a++))
+	do
+		res=$(file ${stra[$a]})
+		if [[ $res =~ "ELF" ]]; then
+			echo "File ${stra[$a]} is binary !";
+			org+="sudo cp $pwd/${stra[$a]} /usr/local/bin\n"
+		elif [[ ${stra[$a]} == "Makefile" ]]; then
+			org+="make\n"
+			org+="sudo make install\n"
+		fi
+	done
+	echo -en $org > setup.pdl
+#	patch_adder $1.pdl
+}
+
+
+function Find(){
+	pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg")
+	mapfile pars_names <<< "$pfiles"
+	for ((a = 0; a < ${#pars_names[@]}; a++))
+	{
+		org=${pars_names[$a]};
+		if [[ $1 == ${org:0:-1} ]]; then
+			echo_danger "you have already had $1 this file !"
+			return 1;
+		fi
+	}
+	return 0;
+}
+
 # New version of PatchAdder (Beta)
 function patch_adder()
 {
+	echo $1;
 	stext=$1
 	slen=${#stext}
 	if [[ ${stext:$((slen - 3)):3} != "pdl" ]]; then
 		echo_danger "you can't use any file type !";
-		return 0
+		return 1;
 	fi
 
 	if [ -f "$(pwd)/$1" ]; then
@@ -129,21 +225,17 @@ function patch_adder()
 			return 0;
 		fi
 	fi	
-
 	file_name=$(sed -n 1p $path)
 	file_name_org=${file_name:7}
 
-	pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg")
-	mapfile pars_names <<< "$pfiles"
-	for ((a = 0; a < ${#pars_names[@]}; a++))
-	{
-		org=${pars_names[$a]};
-		if [[ $file_name_org == ${org:0:-1} ]]; then
-			echo_danger "you have already had $file_name_org this file !"
-			return 1;
-		fi
-	}
+	Find $file_name_org
+	res=$?
+	if [[ $res -eq 1 ]]; then
+		return 1;
+	fi
+	
 	org=""
+	uncode=""
 	num=0;
 	code=$(cat $path | sed '/^[[:space:]]*$/d')
 	mapfile -t data <<< "$code"
@@ -153,68 +245,26 @@ function patch_adder()
 		if [[ ${data[$i]} != "" ]]; then
 			if  [[ ${d:0:6} == "--code" ]]; then
 				num="1";
+			elif [[ ${d:0:8} == "--uninst" ]]; then
+				num="3";
 			elif [[ $num == "1" ]]; then
-				org+="${data[$i]};"
+				org+="${data[$i]}*"
 			elif [[ ${d:0:6} == "--desc" ]]; then
 				num="2";
 			elif [[ $num == "2" ]]; then
 				org_des+="$d\n"
+			elif [[ $num == "3" ]]; then
+				uncode+="$d*";
 			fi
 
 		fi
 	}
-	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', '$org_des', '$org');"
+	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', '$org_des', '$org', '$1', '$uncode');"
 	echo_success "[+] The $1 patch file was applied"
 	org=""
 	org_des=""
+	num=0;
 }
-
-# Orginal And Ols version of PatchAdder function
-#function patch_adder()
-#{
-#	stext=$1
-#	slen=${#stext}
-#	if [[ ${stext:$((slen - 3)):3} != "pdl" ]]; then
-#		echo_danger "you can't use any file type !";
-#		return 0
-#	fi
-#
-#	if [ -f "$(pwd)/$1" ]; then
-#		path=$1
-#	else
-#		if [ -f "$(pwd)/PDLP/$1" ]; then
-#			path="PDLP/$1"
-#		else
-#			echo "your file is not found !"
-#			return 0;
-#		fi
-#	fi	
-#	file_name=$(sed -n 1p $path)
-#	file_name_org=${file_name:7}
-#	
-#	pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg")
-#	mapfile pars_names <<< "$pfiles"
-#	for ((a = 0; a < ${#pars_names[@]}; a++))
-#	{
-#		org=${pars_names[$a]};
-#		if [[ $file_name_org == ${org:0:-1} ]]; then
-#			echo_danger "you have already had $file_name_org this file !"
-#			return 1;
-#		fi
-#	}
-#
-#	code=$(cat $path | sed '/^[[:space:]]*$/d')
-#	mapfile -t data <<< "$code"
-#	for ((i = 2; i < ${#data[@]}; i++))
-#	{
-#		if [[ ${data[$i]} != "" ]]; then
-#			org+="${data[$i]};"
-#		fi
-#	}
-#	sqlite3 mainsb "insert into cus_prg values ('$file_name_org', 'This is new Program for new mode in PDL', '$org');"
-#	echo_success "[+] The $1 patch file was applied"
-#	org=""
-#}
 
 
 function ConfigCore(){
@@ -244,6 +294,11 @@ function ConfigCore(){
 	if (( ${#list} > 1 )); then
 		SHOW=$list;
 	fi
+	
+	if (( ${#description} > 1 )); then
+		DESC=$description;
+	fi
+
 }
 
 
@@ -289,6 +344,13 @@ function help()
 	echo_secondary "-u/--update       "; echo_info "update patch files from PDLP git repository"
 	echo_secondary "-d       	  "; echo_info "Remove Program with name"
 	echo_secondary "-r       	  "; echo_info "Print repository that pdl currently use"
+	echo_secondary "install       	  "; echo_info "Install any program from git repository"
+	echo_secondary "make       	  "; echo_info "Create Auto patch file (setup.pdl)"
+	echo_secondary "search       	  "; echo_info "Search your patch file ( depend on what repo do you config )"
+	echo_primary "----------------------------------------------------"
+	echo_secondary "help <content>    "; echo_info "You can see each information (HOWTO) content"
+
+
 }
 
 function comp_inst()
@@ -335,18 +397,104 @@ function custom()
 	do
 		if [[ ${dnc[$o]} == $1 ]]; then
 			data_code=$(sqlite3 mainsb "select code from cus_prg where name='$1'")
-			read -a str <<< "$data_code"
+			read -a strq <<< "$data_code"
 			break
 		fi
 	done
-	for ((i = 0; i < ${#str[@]}; i++))
+	dep_line=${strq[0]};
+	if [[ ${dep_line:0:3} == "DEP" ]]; then
+		if [[ $2 != "2" ]]; then
+			dep_value=${dep_line:4:${#dep_line}}
+			spl_data=$dep_value;
+			#readarray -d " " -t strarr <<< "$spl_data"
+			PreInstall $spl_data $1
+			return 1;
+		fi
+	fi
+	#echo "------------------------------------"
+	#echo $1
+	#if [[ $1 == "just" ]]; then echo "asdkjalksdjaksldjaslkjkasljdkasj"; else echo "a$1.pdl"; fi
+	out_path="/tmp/$(( RANDOM % 100 )).sh"
+	echo "#!/usr/bin/bash" >> $out_path
+	for ((i = 0; i < ${#strq[@]}; i++))
 	do
-		echo "[!] Executing: ${str[$i]}"
-		eval ${str[$i]}
+		run_data=${strq[$i]}
+		if [[ ${run_data:0:3} != "DEP" ]]; then
+			echo "[!] Executing: ${strq[$i]}"
+			echo ${strq[$i]} >> $out_path
+		fi
 	done
-	#cd -;
-	cd "${dsa:0:$((${#dsa} - 3))}"
+	chmod +x "$out_path"
+	source "$out_path"
+	rm $out_path
 }
+function Uninstall()
+{
+	data_name=($(sqlite3 mainsb "select name from cus_prg"))
+	mapfile -t dnc <<< "$data_name"
+	for ((o = 0; o < ${#dnc[@]}; o++))
+	do
+		if [[ ${dnc[$o]} == $1 ]]; then
+			data_code=$(sqlite3 mainsb "select uncode from cus_prg where name='$1'")
+			read -a strq <<< "$data_code"
+			break
+		fi
+	done
+	out_path="/tmp/$(( $RANDOM % 10 )).run"
+	echo "#!/usr/bin/bash" >> $out_path
+	for ((i = 0; i < ${#strq[@]}; i++))
+	do
+		run_data=${strq[$i]}
+		echo $run_data >> $out_path;
+	done
+	chmod +x "$out_path"
+	source "$out_path"
+	rm $out_path
+}
+
+function Search()
+{
+	asd=$(curl -s https://api.github.com/repos/$API_REPO/contents | grep name | tr -d "," | tr -d "    ")	
+	asd=${asd//\"/""}
+	mapfile tg <<< "$asd";
+	chs=false;
+	num=0;
+	org_des="";
+	for ((a = 0; a < ${#tg[@]}; a++))
+	do
+		readarray -d ':' -t new_str <<< "${tg[$a]}"
+		org=$(echo ${new_str[1]} | tr -d "\n")
+		if [[ $1.pdl == $org ]]; then
+			chs=true;
+			code=$(curl -s https://raw.githubusercontent.com/$API_REPO/master/$1.pdl)
+			mapfile -t data <<< "$code"
+			for ((i = 1; i < ${#data[@]}; i++))
+			{
+				d=${data[$i]}
+				if [[ ${data[$i]} != "" ]]; then
+					if  [[ ${d:0:6} == "--code" ]]; then
+						nuum=0;
+						break
+					fi
+					if [[ ${d:0:6} == "--desc" ]]; then
+						num="2";
+					elif [[ $num == "2" ]]; then
+						org_des+="$d\n"
+					fi
+
+				fi
+			}
+			echo_info "Package Name: $1"
+			echo_info "Description :\n"
+			echo_info $org_des
+			break;
+		fi
+	done
+	if [ $chs == false ]; then
+		echo_danger "I can't find your patch file !"
+	fi
+}
+
 
 function GetCount(){
 	norm_count=($(sqlite3 mainsb "select name from norm_prg"))
@@ -367,7 +515,7 @@ function net()
 		return 0;
 	fi
 
-	git clone "$REPO" -q
+	git clone "$REPO" -b beta_pdlp -q
 	file=$(ls PDLP)
 	mapfile -t files <<< "$file"
 	for ((a = 0; a < ${#files[@]}; a++))
@@ -375,6 +523,73 @@ function net()
 		patch_adder ${files[$a]}
 	done
 	rm -rf PDLP
+}
+
+function PreInstall()
+{
+	GetAll $1;
+	readarray -d " " -t tga <<< "$1"
+	len=${#tga[@]}
+	end_item=${tga[$((len - 1))]}
+	len_end_item=${#end_item}
+	tga[$(( len - 1 ))]=${end_item:0:$((len_end_item - 1))};
+	for ((a = 0; a < ${#tga[@]}; a++))
+	do
+		realname=$(sqlite3 mainsb "select name from cus_prg where filename='${tga[$a]}.pdl';")
+		echo $realname
+		custom $realname;
+	done
+	custom $2 2
+}
+
+function GetAll()
+{
+	readarray -d " " -t tg <<< "$1"
+	len=${#tg[@]}
+	end_item=${tg[$((len - 1))]}
+	len_end_item=${#end_item}
+	tg[$(( len - 1 ))]=${end_item:0:$((len_end_item - 1))};
+	
+	for ((as = 0; as < $len; as++))
+	do
+		Cneto ${tg[$as]}
+	done
+}
+
+function Cneto() {
+	#dsa=$(curl -s https://raw.githubusercontent.com/$API_REPO/beta_pdlp/$1.pdl) > $1.pdl;
+	dsa=$(curl -s https://raw.githubusercontent.com/$API_REPO/beta_pdlp/$1.pdl);
+	echo $dsa > $1.pdl
+	if [[ $dsa =~ "404" ]]; then
+		echo_danger "I can't find your patch file !";
+		rm $1.pdl
+		return 1;
+	fi
+	patch_adder "$1.pdl";
+	rm $1.pdl
+}
+
+function LocalInstall(){
+	Cneto $1;
+	custom $1;
+}
+
+function menu_install()
+{
+	work=false;
+	data_name=($(sqlite3 mainsb "select name from cus_prg"))
+	mapfile -t dnc <<< "$data_name"
+	for ((o = 0; o < ${#dnc[@]}; o++))
+	do
+		if [[ ${dnc[$o]} == $1 ]]; then
+			work=true
+			break
+		fi
+	done
+	if [[ $work == false ]]; then
+		Cneto $1;
+	fi;
+	custom $1;
 }
 
 function choos_item_cust()
@@ -398,7 +613,9 @@ function custom_menu()
 	do
 		
 		echo_secondary "$((i3 + 1)) - ${arr3[$i3]}\n"
-		echo_secondary "\n${arr4[$i3]}\n";
+		if [[ $DESC == "on" ]]; then
+			echo_info "\n${arr4[$i3]}\n";
+		fi
 		echo_secondary "----------------------------\n"
 		custs+=(${arr3[$i3]})
 	done
@@ -413,6 +630,13 @@ function custom_menu()
 			custom ${custs[num]}
 		;;
 	esac
+}
+
+function custome_menu_2()
+{
+	echo -ne "\n"
+	read -p "Enter your patch name: " pfn
+	menu_install $pfn;
 }
 
 function prg_list()
@@ -445,9 +669,14 @@ function prg_list()
 
 function cus_remove()
 {
-	# Sql-Injection Zone - we should check value or better way use regex
-	sqlite3 mainsb "delete from cus_prg where name = '$1'"
-	echo "[+] Package $1 is remove from custome packages"
+	Find $1
+	res=$?
+	if [[ $res -eq 1 ]]; then
+		sqlite3 mainsb "delete from cus_prg where name = '$1'"
+		echo "[+] Package $1 is remove from custome packages"
+	else
+		echo "I can't find your package !"
+	fi
 }
 
 function main_menu()
@@ -471,7 +700,8 @@ if [ -z "$*" ] || [ $1 == "-s" ] && [[ $MENU == "1" ]]; then
 		elif [[ $selc == "2" ]]; then
 			comp_inst;
 		elif [[ $selc == "3" ]]; then
-			custom_menu
+			#custom_menu
+			custome_menu_2
 		elif [[ $selc == "list 1" ]] || [[ $selc == "l 1" ]]; then
 			echo_primary "\n-- Normal installation packages --"
 			data=($(sqlite3 mainsb 'select name from norm_prg'))
@@ -488,6 +718,8 @@ if [ -z "$*" ] || [ $1 == "-s" ] && [[ $MENU == "1" ]]; then
 			do
 				echo_secondary "[+] Package ${arr[$i2]}\n"
 			done
+		elif [[ $selc == "l" ]]; then
+			prg_list;
 		elif [[ $selc == "exit" ]] || [[ $selc == "q" ]]; then
 			break
 		elif [[ $selc == "version" ]]; then
@@ -526,6 +758,20 @@ elif [ $1 == "-d" ]; then
 	cus_remove $2
 elif [ $1 == "-r" ]; then
 	echo $REPO;
+elif [ $1 == "make" ]; then
+	makepatch $2
+elif [ $1 == "install" ]; then
+	LocalInstall $2
+elif [ $1 == "remove" ]; then
+	cus_remove $2;
+elif [ $1 == "help" ]; then
+	help_information $2
+elif [ $1 == "search" ]; then
+	Search $2;
+elif [ $1 == "uninstall" ]; then
+	Uninstall $2;
+elif [ $1 == "--version" ] || [ $1 == "-v" ]; then
+	echo $VERSION;
 else
 	echo_danger "This command is not found !, try ./main --help"
 fi
