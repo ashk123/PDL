@@ -308,7 +308,7 @@ $pck_name;
 $str;
 
 # PDL Banner
-splash "LainOS PRGD - V$VERSION"
+splash "LainOS PDL - V$VERSION"
 if [ -f "$CONF_PATH/.pdlrc" ]; then
 	ConfigCore
 fi
@@ -426,6 +426,7 @@ function custom()
 	done
 	chmod +x "$out_path"
 	source "$out_path"
+	cd "${dsa:0:$((${#dsa} - 3))}"
 	rm $out_path
 	echo "------------------------------"
 }
