@@ -23,7 +23,7 @@
 # list: when you use -l, which group of programs that pdl should show you
 # description: turn on or off information on custome list
 
-VERSION="3.9 (beta)"
+VERSION="3.9"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
 CONF_PATH=/home/$(whoami)
@@ -420,13 +420,14 @@ function custom()
 	do
 		run_data=${strq[$i]}
 		if [[ ${run_data:0:3} != "DEP" ]]; then
-			echo "[!] Executing: ${strq[$i]}"
+			#echo "[!] Executing: ${strq[$i]}"
 			echo ${strq[$i]} >> $out_path
 		fi
 	done
 	chmod +x "$out_path"
 	source "$out_path"
 	rm $out_path
+	echo "------------------------------"
 }
 function Uninstall()
 {
@@ -515,7 +516,7 @@ function net()
 		return 0;
 	fi
 
-	git clone "$REPO" -b beta_pdlp -q
+	git clone "$REPO" -b master -q
 	file=$(ls PDLP)
 	mapfile -t files <<< "$file"
 	for ((a = 0; a < ${#files[@]}; a++))
@@ -539,7 +540,7 @@ function PreInstall()
 		echo $realname
 		custom $realname;
 	done
-	custom $2 2
+	custom $2 "2"
 }
 
 function GetAll()
@@ -558,7 +559,7 @@ function GetAll()
 
 function Cneto() {
 	#dsa=$(curl -s https://raw.githubusercontent.com/$API_REPO/beta_pdlp/$1.pdl) > $1.pdl;
-	dsa=$(curl -s https://raw.githubusercontent.com/$API_REPO/beta_pdlp/$1.pdl);
+	dsa=$(curl -s -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/$API_REPO/master/$1.pdl);
 	echo $dsa > $1.pdl
 	if [[ $dsa =~ "404" ]]; then
 		echo_danger "I can't find your patch file !";
