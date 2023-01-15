@@ -26,7 +26,7 @@
 VERSION="3.9"
 NAME="LainOS LPD Package Downloader"
 OS='LainOS'
-CONF_PATH=/home/$(whoami)
+CONF_PATH=$HOME
 MENU='1'
 SHOW='all'
 DESC='on'
