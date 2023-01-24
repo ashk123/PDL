@@ -367,19 +367,19 @@ function comp_inst()
 	}
 }
 
-function norm_inst()
-{
-	data2=($(sqlite3 mainsb 'select name from norm_prg'))
-	mapfile -t arr5 <<< "$data2"
-	for ((i = 0; i < ${#arr5[@]}; i++))
-	{
-		if pe ${arr5[$i]}; then
-			echo_warning "[!] You already have ${arr5[$i]} package installed!"
-		else
-			eval "sudo apt install ${arr5[$i]}"
-		fi
-	}
-}
+#function norm_inst()
+#{
+#	data2=($(sqlite3 mainsb 'select name from norm_prg'))
+#	mapfile -t arr5 <<< "$data2"
+#	for ((i = 0; i < ${#arr5[@]}; i++))
+#	{
+#		if pe ${arr5[$i]}; then
+#			echo_warning "[!] You already have ${arr5[$i]} package installed!"
+#		else
+#			eval "sudo apt install ${arr5[$i]}"
+#		fi
+#	}
+#}
 
 function customize_installation()
 {
@@ -499,11 +499,11 @@ function Search()
 
 
 function GetCount(){
-	norm_count=($(sqlite3 mainsb "select name from norm_prg"))
-	comp_count=($(sqlite3 mainsb "select name from comp_prg"))
+	#norm_count=($(sqlite3 mainsb "select name from norm_prg"))
+	#comp_count=($(sqlite3 mainsb "select name from comp_prg"))
 	cus_count=($(sqlite3 mainsb "select name from cus_prg"))
-	mapfile -t ncc <<< "$norm_count"		
-	mapfile -t ccc <<< "$comp_count"
+	#mapfile -t ncc <<< "$norm_count"		
+	#mapfile -t ccc <<< "$comp_count"
 	mapfile -t cucc <<< "$cus_count"
 }
 GetCount
@@ -681,13 +681,13 @@ function cus_remove()
 	fi
 }
 
-function main_menu()
-{
-	echo ""
-	echo_primary "1. Normal installation (${#ncc[@]})"
-	echo_primary "2. Compilers           (${#ccc[@]})"
-	echo_primary "3. Custom list         (${#cucc[@]})"
-}
+#function main_menu()
+#{
+#	echo ""
+#	echo_primary "1. Normal installation (${#ncc[@]})"
+#	echo_primary "2. Compilers           (${#ccc[@]})"
+#	echo_primary "3. Custom list         (${#cucc[@]})"
+#}
 
 if [ -z "$*" ]; then
 #	while [ true ]
