@@ -39,8 +39,8 @@ Document of PDL ( package downloading lainOS )
 
 # Dev Information
 
-        Database: sqlite3 V3.34.1 <br>
-        Programming Language: Bash V5.1.4 <br>
+        Database: sqlite3 V3.34.1
+        Programming Language: Bash V5.1.4
         OS: LainOS (debian)
 
 
