@@ -191,17 +191,13 @@ this is nice for me
 
 
 function Find(){
-	pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg")
-	mapfile pars_names <<< "$pfiles"
-	for ((a = 0; a < ${#pars_names[@]}; a++))
-	{
-		org=${pars_names[$a]};
-		if [[ $1 == ${org:0:-1} ]]; then
-			echo_danger "you have already had $1 this file !"
-			return 1;
-		fi
-	}
-	return 0;
+	pfiles=$(sqlite3 mainsb "SELECT name FROM cus_prg where name='$1'")
+	plne=${#pfiles}
+	if (( $plne == 0 )); then
+		return 0;
+	else
+		return 1;
+	fi
 }
 
 # New version of PatchAdder (Beta)
@@ -227,7 +223,6 @@ function patch_adder()
 	fi	
 	file_name=$(sed -n 1p $path)
 	file_name_org=${file_name:7}
-
 	Find $file_name_org
 	res=$?
 	if [[ $res -eq 1 ]]; then
@@ -522,7 +517,11 @@ function net()
 	mapfile -t files <<< "$file"
 	for ((a = 0; a < ${#files[@]}; a++))
 	do
-		patch_adder ${files[$a]}
+		if [[ ${files[$a]} == "README.md" ]]; then
+			echo "I found a readme file!"
+		else
+			patch_adder ${files[$a]}
+		fi
 	done
 	rm -rf PDLP
 }
