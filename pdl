@@ -207,7 +207,8 @@ function patch_adder()
 	stext=$1
 	slen=${#stext}
 	if [[ ${stext:$((slen - 3)):3} != "pdl" ]]; then
-		echo_danger "you can't use any file type !";
+		#echo_danger "you can't use any file type !";
+		echo_danger "You can't use any file type, it must be a .pdl patch file!";
 		return 1;
 	fi
 
