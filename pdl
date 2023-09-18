@@ -1,22 +1,32 @@
 #!/usr/bin/bash
+# you can use /bin/bash.
 
-# LainOS Orginal Program 237865 2023
-# This Project Wrote for helping you to Install Other Programs
-# Writer : Eiko Akiba
+# Copyright PDL EikoAkiba [LainOS] 2023
 
-# ---- For LainOS Team ----
+#======================================================================
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 
-# Information ( Don't change thease texts )
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see http://www.gnu.org/licenses/
+#======================================================================
+
+# Default VAR Information:
 # default repo is https://github.com/ashk123/PDLP
-# default OS is LainOS
-# default version is 2.9
 # default SHOW is all
 # default MENU is 1
 # default CONF_PATH is ~/.pdlrc
 # pdlrc.sample is a sample config file
 # Auto Patch Creator dependency file is main.dep
 
-# Config Structure
+# Config Structure:
 # your config file should be on ~/.pdlrc ( you can change it on CONF_PATH var )
 # repo: its a repo git address like https://yourgitservice/yourusername/yourpdlpreponame
 # show: how menu start when you run pdl
